@@ -3,5 +3,8 @@
 
 //Include headers from Engine
 
-#include "scene.h"
-#include "shader.h"
+#include "src/error.h"
+#include "src/mesh.h"
+#include "src/scene.h"
+#include "src/shader.h"
+#include "src/storage.h"
