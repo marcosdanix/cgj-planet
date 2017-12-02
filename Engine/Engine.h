@@ -8,3 +8,4 @@
 #include "src/scene.h"
 #include "src/shader.h"
 #include "src/storage.h"
+#include "src/error.h"
