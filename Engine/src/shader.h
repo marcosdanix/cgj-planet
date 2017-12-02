@@ -56,7 +56,14 @@ namespace cgj {
 		
 		//if ya need anymore uniform types, add some here
 		//Like array uniforms for example
-		ShaderProgram& uniform(std::string id, GLfloat item);		ShaderProgram& uniform(std::string id, GLint item);			ShaderProgram& uniform(std::string id, vec2 item);			ShaderProgram& uniform(std::string id, vec3 item);		ShaderProgram& uniform(std::string id, vec4 item);			ShaderProgram& uniform(std::string id, mat2 item);		ShaderProgram& uniform(std::string id, mat3 item);		ShaderProgram& uniform(std::string id, mat4 item);
+		ShaderProgram& uniform(std::string id, GLfloat item);
+		ShaderProgram& uniform(std::string id, GLint item);	
+		ShaderProgram& uniform(std::string id, vec2 item);	
+		ShaderProgram& uniform(std::string id, vec3 item);
+		ShaderProgram& uniform(std::string id, vec4 item);	
+		ShaderProgram& uniform(std::string id, mat2 item);
+		ShaderProgram& uniform(std::string id, mat3 item);
+		ShaderProgram& uniform(std::string id, mat4 item);
 
 
 	private:
