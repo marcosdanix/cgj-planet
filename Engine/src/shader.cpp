@@ -1,5 +1,6 @@
 #include <fstream>
 #include "shader.h"
+#include "error.h"
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace cgj;
@@ -43,6 +44,8 @@ void Shader::load(std::istream & stream)
 	const GLchar* source_ = string_.c_str();
 
 	glShaderSource(id_, 1, &source_, 0);
+	PEEK_OPENGL_ERROR("Failed Generating Shader")
+
 	loaded_ = true;
 }
 
@@ -57,9 +60,9 @@ void Shader::compile(std::ostream & output)
 	glGetShaderiv(id_, GL_COMPILE_STATUS, &status);
 
 	if (status == GL_FALSE) {
-		char buffer[1024];
+		char buffer[65536];
 		GLsizei length;
-		glGetShaderInfoLog(id_, 1024, &length, buffer);
+		glGetShaderInfoLog(id_, 65536, &length, buffer);
 		output.write(buffer, length);
 		throw std::exception("Shader compile exception");
 	}
@@ -76,11 +79,13 @@ GLuint Shader::id()
 GLuint VertexShader::createShader()
 {
 	return glCreateShader(GL_VERTEX_SHADER);
+	PEEK_OPENGL_ERROR("Failed Creating Vertex Shader")
 }
 
 GLuint FragmentShader::createShader()
 {
 	return glCreateShader(GL_FRAGMENT_SHADER);
+	PEEK_OPENGL_ERROR("Failed Creating Fragment Shader")
 }
 
 /////////////////////////////////////////////////////////////////////// ShaderProgram
@@ -105,6 +110,7 @@ ShaderProgram & ShaderProgram::create()
 	if (id_ != 0) return *this;
 
 	id_ = glCreateProgram();
+	PEEK_OPENGL_ERROR("Failed Creating Program")
 
 	if (id_ == 0) {
 		throw std::exception("Failed creating program");
@@ -118,12 +124,14 @@ ShaderProgram & ShaderProgram::attach(Shader * shader)
 	shader->compile();
 	shaders_.push_back(shader);
 	glAttachShader(id_, shader->id());
+	PEEK_OPENGL_ERROR("Failed Attaching Shader")
 	return *this;
 }
 
 ShaderProgram & ShaderProgram::bindAttribute(GLuint index, std::string attribute)
 {
 	glBindAttribLocation(id_, index, attribute.c_str());
+	PEEK_OPENGL_ERROR("Failed Binding Attribute")
 	return *this;
 }
 
@@ -136,9 +144,9 @@ void ShaderProgram::link(std::ostream & output)
 	glGetProgramiv(id_, GL_LINK_STATUS, &status);
 
 	if (status == GL_FALSE) {
-		char buffer[1024];
+		char buffer[65536];
 		GLsizei length;
-		glGetProgramInfoLog(id_, 1024, &length, buffer);
+		glGetProgramInfoLog(id_, 65536, &length, buffer);
 		output.write(buffer, length);
 		throw std::exception("Program link exception");
 		linked_ = false;

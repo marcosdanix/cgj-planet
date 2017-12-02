@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "error.h"
 #include <sstream>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -7,6 +8,8 @@ using namespace cgj;
 #define VERTICES 0
 #define TEXCOORDS 1
 #define NORMALS 2
+
+/////////////////////////////////////////////////////////////////////// Mesh
 
 cgj::Mesh::Mesh(): VaoId(0), VboVertices(0), VboTexcoords(0), VboNormals(0)
 {
@@ -68,6 +71,8 @@ void Mesh::draw()
 void Mesh::createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded)
 {
 	glGenVertexArrays(1, &VaoId);
+	PEEK_OPENGL_ERROR("Failed generating Vertex Array")
+
 	glBindVertexArray(VaoId);
 	{
 		glGenBuffers(1, &VboVertices);
@@ -76,6 +81,8 @@ void Mesh::createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded)
 		glEnableVertexAttribArray(VERTICES);
 		glVertexAttribPointer(VERTICES, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), 0);
 
+		PEEK_OPENGL_ERROR("Failed adding Vertex Buffer")
+
 		if (TexcoordsLoaded)
 		{
 			glGenBuffers(1, &VboTexcoords);
@@ -83,6 +90,8 @@ void Mesh::createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded)
 			glBufferData(GL_ARRAY_BUFFER, Texcoords.size() * sizeof(vec2), &Texcoords[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(TEXCOORDS);
 			glVertexAttribPointer(TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
+
+			PEEK_OPENGL_ERROR("Failed adding Texcoords Buffer")
 		}
 		
 		if (NormalsLoaded)
@@ -92,11 +101,15 @@ void Mesh::createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded)
 			glBufferData(GL_ARRAY_BUFFER, Normals.size() * sizeof(vec3), &Normals[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(NORMALS);
 			glVertexAttribPointer(NORMALS, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), 0);
+
+			PEEK_OPENGL_ERROR("Failed adding Normals Buffer")
 		}
 	}
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
+/////////////////////////////////////////////////////////////////////// MeshParser
 
 cgj::MeshParser::MeshParser(std::string filename): input(std::ifstream(filename))
 {
