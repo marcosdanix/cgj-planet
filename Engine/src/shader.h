@@ -52,6 +52,7 @@ namespace cgj {
 		void link(std::ostream &output = std::cerr);
 		GLint getUniform(std::string id);
 		void use();
+		void stop();
 		void deleteShaders();
 		
 		//if ya need anymore uniform types, add some here

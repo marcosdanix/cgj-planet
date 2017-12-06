@@ -171,6 +171,11 @@ void ShaderProgram::use()
 	glUseProgram(id_);
 }
 
+void cgj::ShaderProgram::stop() //good idea prof
+{
+	glUseProgram(0);
+}
+
 void ShaderProgram::deleteShaders()
 {
 	for (Shader* shader : shaders_) {
