@@ -9,6 +9,7 @@ using namespace glm;
 namespace cgj {
 
 	class Transform {
+	public:
 		Transform();
 		Transform(vec3& scale, quat& orientation, vec3& translation);
 		Transform(float scale, quat& orientation, vec3& translation);

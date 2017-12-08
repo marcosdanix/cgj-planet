@@ -184,6 +184,11 @@ void ShaderProgram::deleteShaders()
 	}
 }
 
+bool cgj::ShaderProgram::empty()
+{
+	return shaders_.empty();
+}
+
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, GLfloat item)
 {
 	GLint uniformId = getUniform(id);

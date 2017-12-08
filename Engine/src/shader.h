@@ -54,6 +54,7 @@ namespace cgj {
 		void use();
 		void stop();
 		void deleteShaders();
+		bool empty();
 		
 		//if ya need anymore uniform types, add some here
 		//Like array uniforms for example
