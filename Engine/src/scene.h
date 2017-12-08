@@ -33,14 +33,15 @@ namespace cgj {
 		Node();
 		Node(Transform transform);
 		
-		//if there is a child, does addNodeBack to that child
-		void addChild(Node* child);
+		//if this Node has a child, does addNodeBack to that child
+		Node& addChild(Node* child);
 		Node* getChildren();
 		Node* removeAllChildren();
 		Node* next();
 		
 		//adds a node to the end of the list
-		void addNodeBack(Node* node);
+		//returns itself
+		Node& addNodeBack(Node* node);
 		//removes the node from its list, and fixes the connection with its parent
 		void removeNodeList();
 
