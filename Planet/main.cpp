@@ -1,15 +1,30 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-
 #include "GL/glew.h"
 #include "GL/freeglut.h"
+#include "../Engine/Engine.h"
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-#define CAPTION "Hello Blank World"
+using namespace cgj;
+
+#define CAPTION "Hello Munkey"
+
+//Shader input attributes
+#define VERTICES 0
+#define TEXCOORDS 1
+#define NORMALS 2
 
 int WinX = 640, WinY = 480;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
+
+//STUFF
+
+Camera camera;
+OrbitControl orbit;
+
 
 /////////////////////////////////////////////////////////////////////// CALLBACKS
 
@@ -23,7 +38,11 @@ void display()
 {
 	++FrameCount;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 	// Draw something
+	Scene* scene = Storage<Scene>::instance().get("example");
+	scene->draw();
+
 	glutSwapBuffers();
 }
 
@@ -41,8 +60,9 @@ void reshape(int w, int h)
 	glViewport(0, 0, WinX, WinY);
 }
 
-//glutTimerFunc
-void timer(int value)
+void timer(int value);
+
+void timerRefreshWindow()
 {
 	std::ostringstream oss;
 	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")";
@@ -51,6 +71,25 @@ void timer(int value)
 	glutSetWindowTitle(s.c_str());
 	FrameCount = 0;
 	glutTimerFunc(1000, timer, 0);
+}
+
+void timerFPS()
+{
+	glutPostRedisplay();
+	glutTimerFunc(16, timer, 1);
+}
+
+//glutTimerFunc
+void timer(int value)
+{
+	switch (value) {
+	case 0:
+		timerRefreshWindow();
+		break;
+	case 1:
+		timerFPS();
+		break;
+	}
 }
 
 
@@ -201,11 +240,75 @@ void setupCallbacks()
 	glutWindowStatusFunc(windowStatus);
 }
 
+/////////////////////////////////////////////////////////////////////// ENGINE SETUP
+
+#define VERT_SHADER_FILE "assets/basic_shader.vert"
+#define FRAG_SHADER_FILE "assets/basic_shader.frag"
+#define MUNKEY_FILE "assets/munkey.obj"	
+
+ShaderProgram shaderProgram;
+VertexShader vertexShader;
+FragmentShader fragmentShader;
+
+void createShaderProgram()
+{
+	vertexShader.load(VERT_SHADER_FILE);
+	fragmentShader.load(FRAG_SHADER_FILE);
+
+	shaderProgram.create()
+		.attach(&vertexShader) //if it's not compiled, it compiles the shader
+		.attach(&fragmentShader)
+		.bindAttribute(VERTICES, "in_Position")
+		.bindAttribute(NORMALS, "in_Normal")
+		.link();
+	
+	//Add to the storage so it can be accessed by the rest of the engine
+	//It's not necessary, but it's being used to test this feature
+	Storage<ShaderProgram>::instance().add("basic", &shaderProgram);
+}
+
+Mesh munkey_mesh;
+
+void createMeshes()
+{
+	munkey_mesh.load(MUNKEY_FILE);
+
+	Storage<Mesh>::instance().add("munkey", &munkey_mesh);
+}
+
+extern Camera camera;
+extern OrbitControl orbit;
+
+void setupCamera()
+{
+	mat4 projection = glm::ortho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+	orbit = OrbitControl(5.0f, 0.0f, 0.0f);
+	camera = Camera(&orbit, projection);
+}
+
+Scene scene;
+Node munkey;
+
+void createScene()
+{
+	scene = Scene(camera);
+	munkey.mesh(*Storage<Mesh>::instance().get("munkey"));
+	munkey.shader(*Storage<ShaderProgram>::instance().get("basic"));
+	scene.root()->addChild(&munkey);
+	
+	Storage<Scene>::instance().add("example", &scene);
+}
+
+
 void init(int argc, char* argv[])
 {
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
+	createShaderProgram();
+	createMeshes();
+	setupCamera();
+	createScene();	
 	setupCallbacks();
 }
 

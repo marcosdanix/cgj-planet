@@ -5,6 +5,10 @@ using namespace cgj;
 
 /////////////////////////////////////////////////////////////////////// Scene
 
+cgj::Scene::Scene()
+{
+}
+
 Scene::Scene(Camera & camera, Transform& transform): root_(transform), camera_(camera)
 {
 }

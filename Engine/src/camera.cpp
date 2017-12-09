@@ -1,12 +1,21 @@
-#include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "camera.h"
+#include <glm/vec3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+
 
 #define DEG2RAD 0.01745329252f
 #define QUAT_ID (quat(1.0f, 0.0f, 0.0f, 0.0f))
 using namespace cgj;
+
+cgj::OrbitControl::OrbitControl():
+	orientation_(QUAT_ID), //no rotation
+	distance_(1.0),
+	rotspeed_(0.0),
+	speed_(0.0),
+	offset_(0.0f)
+{
+}
 
 OrbitControl::OrbitControl(float distance, float rot_speed, float speed):
 	orientation_(QUAT_ID), //no rotation

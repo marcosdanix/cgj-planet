@@ -21,8 +21,8 @@ namespace cgj {
 	template<class T>
 	inline Storage<T>& Storage<T>::instance()
 	{
-		static Storage<T> instance = new Storage<T>();
-		return instance_;
+		static Storage<T>* instance = new Storage<T>();
+		return *instance;
 	}
 
 	template<class T>
@@ -30,6 +30,7 @@ namespace cgj {
 	{
 		remove(name);
 		map_[name] = item;
+		return *this;
 	}
 
 	template<class T>
@@ -38,6 +39,7 @@ namespace cgj {
 		if (map_.find(name) != map_.end()) {
 			delete map_[name];
 		}
+		return *this;
 	}
 
 	template<class T>

@@ -1,5 +1,6 @@
 #pragma once
-#include <glm/fwd.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace glm;
 
@@ -14,6 +15,7 @@ namespace cgj {
 
 	class Camera {
 	public:
+		Camera() : control_(nullptr), projection_(mat4(1.0)) {}
 		Camera(CameraControl* control, mat4& projection) : control_(control), projection_(projection) {}
 		mat4 view() { return control_->view(); }
 		mat4 projection() { return projection_; }
@@ -26,6 +28,7 @@ namespace cgj {
 
 	class OrbitControl : public CameraControl {
 	public:
+		OrbitControl();
 		OrbitControl(float distance, float rot_speed, float speed);
 		mat4 view();
 		mat4 inverse();

@@ -64,6 +64,7 @@ namespace cgj {
 
 	class Scene {
 	public:
+		Scene();
 		Scene(Camera& camera, Transform& transform = Transform());
 		Node* root();
 		void draw();
