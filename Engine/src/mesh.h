@@ -25,6 +25,8 @@ namespace cgj {
 		GLuint VaoId;
 		GLuint VboVertices, VboTexcoords, VboNormals;
 
+		int count;
+
 		void createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded);
 	};
 

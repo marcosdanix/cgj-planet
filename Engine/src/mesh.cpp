@@ -11,7 +11,7 @@ using namespace cgj;
 
 /////////////////////////////////////////////////////////////////////// Mesh
 
-cgj::Mesh::Mesh(): VaoId(0), VboVertices(0), VboTexcoords(0), VboNormals(0)
+cgj::Mesh::Mesh(): VaoId(0), VboVertices(0), VboTexcoords(0), VboNormals(0), count(0)
 {
 }
 
@@ -54,6 +54,8 @@ void Mesh::load(std::string filename)
 
 	createBufferObjects(parser.TexcoordsLoaded, parser.NormalsLoaded);
 
+	count = Vertices.size();
+
 	Vertices.clear();
 	Texcoords.clear();
 	Normals.clear();
@@ -61,10 +63,10 @@ void Mesh::load(std::string filename)
 
 void Mesh::draw()
 {
-	if (Vertices.size() == 0) return; //Don't draw if there's no data to load
+	if (count == 0) return; //Don't draw if there's no data to load
 
 	glBindVertexArray(VaoId);
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)Vertices.size());
+	glDrawArrays(GL_TRIANGLES, 0, count);
 	glBindVertexArray(0);
 	PEEK_OPENGL_ERROR("Failed drawing Vertices")
 }

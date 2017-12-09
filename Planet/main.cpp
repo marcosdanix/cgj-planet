@@ -49,7 +49,7 @@ void display()
 //glutIdleFunc
 void idle()
 {
-	glutPostRedisplay();
+	//glutPostRedisplay();
 }
 
 //glutReshapeFunc
@@ -58,6 +58,11 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
+	
+	float aspect = float(w) / float(h);
+	mat4 projection = glm::ortho(-aspect*2.0, aspect*2.0, -2.0, 2.0, -2.0, 4.0);
+	camera.projection(projection);
+
 }
 
 void timer(int value);
@@ -226,7 +231,7 @@ void setupCallbacks()
 {
 	glutCloseFunc(cleanup);
 	glutDisplayFunc(display);
-	glutIdleFunc(idle);
+	//glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0, timer, 0);
 	glutKeyboardFunc(keyboard);
@@ -276,13 +281,13 @@ void createMeshes()
 	Storage<Mesh>::instance().add("munkey", &munkey_mesh);
 }
 
-extern Camera camera;
-extern OrbitControl orbit;
+
 
 void setupCamera()
 {
-	mat4 projection = glm::ortho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-	orbit = OrbitControl(5.0f, 0.0f, 0.0f);
+	float aspect = float(WinX) / float(WinY);
+	mat4 projection = glm::ortho(-aspect*2.0, aspect*2.0, -2.0, 2.0, -2.0, 4.0);
+	orbit = OrbitControl(2.0f, 0.0f, 0.0f);
 	camera = Camera(&orbit, projection);
 }
 

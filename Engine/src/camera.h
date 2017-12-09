@@ -18,7 +18,9 @@ namespace cgj {
 		Camera() : control_(nullptr), projection_(mat4(1.0)) {}
 		Camera(CameraControl* control, mat4& projection) : control_(control), projection_(projection) {}
 		mat4 view() { return control_->view(); }
+		void view(CameraControl* control) { control_ = control; }
 		mat4 projection() { return projection_; }
+		void projection(mat4& projection) { projection_ = projection; }
 		mat4 inverseView() { return control_->inverse(); }
 	private:
 		CameraControl* control_;
