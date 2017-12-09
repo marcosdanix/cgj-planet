@@ -106,13 +106,14 @@ void cgj::Node::draw(Camera& camera)
 		if (!node->shader_.empty()) {	
 			node->shader_.use();			
 				//uniform attributes
-				node->shader_.uniform(ModelAttributeName, it.matrix());
-				node->shader_.uniform(ViewAttributeName, camera.view());
-				node->shader_.uniform(ProjectionAttributeName, camera.projection());
-				mat4 normal = transpose(it.inverse() * camera.inverseView());
-				node->shader_.uniform(NormalAttributeName, normal);
-				node->mesh_.draw();
-
+			mat4 normal = transpose(it.inverse() * camera.inverseView());
+			node->shader_
+				.uniform(ModelAttributeName, it.matrix())
+				.uniform(ViewAttributeName, camera.view())
+				.uniform(ProjectionAttributeName, camera.projection())				
+				.uniform(NormalAttributeName, normal);
+			
+			node->mesh_.draw();
 			node->shader_.stop();
 		}
 		
@@ -138,4 +139,64 @@ Node & cgj::Node::mesh(Mesh & mesh)
 Node & cgj::Node::shader(ShaderProgram & shader)
 {
 	shader_ = shader;
+}
+
+/////////////////////////////////////////////////////////////////////// NodeIterator
+
+cgj::NodeIterator::NodeIterator(Node * start)
+{
+	start_.push(start);
+	stack_.push(start->transform());
+	node_ = start;
+}
+
+Node * cgj::NodeIterator::get()
+{
+	return node_;
+}
+
+mat4 cgj::NodeIterator::matrix()
+{
+	return stack_.result();
+}
+
+mat4 cgj::NodeIterator::inverse()
+{
+	return stack_.inverse();
+}
+
+void cgj::NodeIterator::next()
+{
+	Node* child = node_->child_;
+	Node* next = node_->next_;
+
+	if (child != nullptr) {
+		start_.push(child);
+		stack_.push(child->transform_);
+		node_ = child;
+	}        //end of the list
+	else if (next == start_.top()) {
+		do {
+			//going back back back back...
+			start_.pop();
+			stack_.pop();
+			node_ = node_->parent_;
+			if (node_ == nullptr) return; //this ends the iteration in isEnd()
+			next = node_->next_;
+		} while (next != nullptr || next != start_.top());
+
+		node_ = next;
+		stack_.push(node_->transform_);
+
+	}
+	else {
+		stack_.pop();
+		node_ = node_->next_;
+		stack_.push(node_->transform_);
+	}
+}
+
+bool cgj::NodeIterator::isEnd()
+{
+	return node_ == nullptr;
 }

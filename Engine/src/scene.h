@@ -14,7 +14,7 @@ namespace cgj {
 	const std::string ModelAttributeName = "Model";
 	const std::string ViewAttributeName = "View";
 	const std::string ProjectionAttributeName = "Projection";
-	//View*Model
+	//Normal matrix is in eye space (View * Model)
 	const std::string NormalAttributeName = "Normal";
 	
 	class Node;
@@ -35,7 +35,7 @@ namespace cgj {
 
 
 	class Node {
-		friend class MatrixStack;
+		friend class NodeIterator;
 	public:
 		Node();
 		Node(Transform& transform);
@@ -55,6 +55,8 @@ namespace cgj {
 		void draw(Camera& camera);
 
 		Transform& transform();
+		mat4 matrix();
+		mat4 inverse();
 		Node& transform(Transform& t);
 		Node& mesh(Mesh& mesh);
 		Node& shader(ShaderProgram& shader);
@@ -84,7 +86,7 @@ namespace cgj {
 		bool isEnd();
 	private:
 		std::stack<Node*> start_;
-		MatrixStack matrix_;
+		TransformStack stack_;
 		Node* node_;
 	};
 
