@@ -66,6 +66,7 @@ void Mesh::draw()
 	glBindVertexArray(VaoId);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)Vertices.size());
 	glBindVertexArray(0);
+	PEEK_OPENGL_ERROR("Failed drawing Vertices")
 }
 
 void Mesh::createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded)

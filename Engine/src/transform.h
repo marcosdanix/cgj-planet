@@ -36,6 +36,7 @@ namespace cgj {
 		void rotateZ(float radians);
 
 		mat4 matrix();
+		mat4 inverse();
 	private:
 		vec3 scale_;
 		quat orientation_;

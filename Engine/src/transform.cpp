@@ -114,3 +114,11 @@ mat4 cgj::Transform::matrix()
 		mat4_cast(orientation_) *
 		glm::scale(mat4(1.0f), scale_);
 }
+
+//plox don't use any 0 scale component
+mat4 cgj::Transform::inverse()
+{
+	return glm::scale(mat4(1.0), 1.0f / scale_) *
+		transpose(mat4_cast(orientation_)) *
+		glm::translate(mat4(1.0f), -translation_);
+}
