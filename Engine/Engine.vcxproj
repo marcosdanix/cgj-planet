@@ -120,6 +120,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\error.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\scene.h" />
@@ -129,6 +130,7 @@
     <ClInclude Include="src\util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\error.cpp" />
     <ClCompile Include="src\mesh.cpp" />
     <ClCompile Include="src\scene.cpp" />

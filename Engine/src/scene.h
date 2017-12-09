@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "mesh.h"
 #include "util.h"
+#include "camera.h"
 
 //Scene and Node related code
 
@@ -90,11 +91,5 @@ namespace cgj {
 		Node* node_;
 	};
 
-	class Camera {
-	public:
-		mat4 view();
-		mat4 projection();
-		mat4 inverseView();
-	};
 
 }
