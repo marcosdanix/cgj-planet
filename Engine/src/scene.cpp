@@ -5,14 +5,6 @@ using namespace cgj;
 
 /////////////////////////////////////////////////////////////////////// Scene
 
-Scene::Scene(): root_(), camera_()
-{
-}
-
-Scene::Scene(Transform & transform): root_(transform), camera_()
-{
-}
-
 Scene::Scene(Camera & camera, Transform& transform): root_(transform), camera_(camera)
 {
 }
@@ -129,16 +121,19 @@ Transform& cgj::Node::transform()
 Node & cgj::Node::transform(Transform & t)
 {
 	transform_ = t;
+	return *this;
 }
 
 Node & cgj::Node::mesh(Mesh & mesh)
 {
 	mesh_ = mesh;
+	return *this;
 }
 
 Node & cgj::Node::shader(ShaderProgram & shader)
 {
 	shader_ = shader;
+	return *this;
 }
 
 /////////////////////////////////////////////////////////////////////// NodeIterator

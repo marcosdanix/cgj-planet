@@ -15,7 +15,7 @@ namespace cgj {
 		void push(mat4& matrix);
 		void pop();
 		mat4 result();
-		int size();
+		size_t size();
 		bool empty();
 	private:
 		std::stack<mat4> stack_;
@@ -30,7 +30,7 @@ namespace cgj {
 		void pop();
 		mat4 result();
 		mat4 inverse();
-		int size();
+		size_t size();
 		bool empty();
 	private:
 		std::stack<Transform> stack_;

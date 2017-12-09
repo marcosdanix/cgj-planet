@@ -39,8 +39,7 @@ mat4 MatrixStack::result()
 	else
 		return results_.top() * stack_.top();
 }
-
-int MatrixStack::size()
+size_t MatrixStack::size()
 {
 	return stack_.size();
 }
@@ -106,7 +105,7 @@ mat4 TransformStack::inverse()
 		return stack_.top().inverse() * inverse_.top();
 }
 
-int TransformStack::size()
+size_t TransformStack::size()
 {
 	return stack_.size();
 }

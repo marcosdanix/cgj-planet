@@ -192,55 +192,55 @@ bool cgj::ShaderProgram::empty()
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, GLfloat item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniform1f(uniformId, item);
+	if (uniformId != -1) glUniform1f(uniformId, item);
+	return *this;
 }
 
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, GLint item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniform1i(uniformId, item);
+	if (uniformId != -1) glUniform1i(uniformId, item);
+	return *this;
 }
 
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, vec2 item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniform2f(uniformId, item.x, item.y);
+	if (uniformId != -1) glUniform2f(uniformId, item.x, item.y);
+	return *this;
 }
 
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, vec3 item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniform3f(uniformId, item.x, item.y, item.z);
+	if (uniformId != -1) glUniform3f(uniformId, item.x, item.y, item.z);
+	return *this;
 }
 
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, vec4 item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniform4f(uniformId, item.x, item.y, item.z, item.w);
+	if (uniformId != -1) glUniform4f(uniformId, item.x, item.y, item.z, item.w);
+	return *this;
 }
 
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, mat2 item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniformMatrix2fv(uniformId, 1, GL_FALSE, value_ptr(item));
+	if (uniformId != -1) glUniformMatrix2fv(uniformId, 1, GL_FALSE, value_ptr(item));
+	return *this;
 }
 
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, mat3 item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniformMatrix3fv(uniformId, 1, GL_FALSE, value_ptr(item));
+	if (uniformId != -1) glUniformMatrix3fv(uniformId, 1, GL_FALSE, value_ptr(item));
+	return *this;
 }
 
 ShaderProgram & cgj::ShaderProgram::uniform(std::string id, mat4 item)
 {
 	GLint uniformId = getUniform(id);
-	if (uniformId == -1) return;
-	glUniformMatrix4fv(uniformId, 1, GL_FALSE, value_ptr(item));
+	if (uniformId != -1) glUniformMatrix4fv(uniformId, 1, GL_FALSE, value_ptr(item));
+	return *this;
 }

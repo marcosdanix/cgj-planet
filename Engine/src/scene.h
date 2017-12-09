@@ -22,19 +22,6 @@ namespace cgj {
 	class Scene;
 	class Camera;
 	
-	class Scene {
-	public:
-		Scene();
-		Scene(Transform& transform);
-		Scene(Camera& camera, Transform& transform = Transform());
-		Node* root();
-		void draw();
-	private:
-		Node root_;
-		Camera camera_;
-	};
-
-
 	class Node {
 		friend class NodeIterator;
 	public:
@@ -74,6 +61,17 @@ namespace cgj {
 		Mesh mesh_;
 		ShaderProgram shader_;
 	};
+
+	class Scene {
+	public:
+		Scene(Camera& camera, Transform& transform = Transform());
+		Node* root();
+		void draw();
+	private:
+		Node root_;
+		Camera camera_;
+	};
+
 
 	//Walk through the tree depth first
 	//Uses the matrix stack to calculate the world transform of the current node
