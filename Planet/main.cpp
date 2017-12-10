@@ -249,7 +249,12 @@ void setupCallbacks()
 
 #define VERT_SHADER_FILE "assets/basic_shader.vert"
 #define FRAG_SHADER_FILE "assets/basic_shader.frag"
+//#define VERT_SHADER_FILE "assets/basic_color.vert"
+//#define FRAG_SHADER_FILE "assets/basic_color.frag"
+//#define VERT_SHADER_FILE "assets/blinn_phong.vert"
+//#define FRAG_SHADER_FILE "assets/blinn_phong.frag"
 #define MUNKEY_FILE "assets/munkey.obj"	
+//#define MUNKEY_FILE "assets/icosphere.obj"	
 
 ShaderProgram shaderProgram;
 VertexShader vertexShader;

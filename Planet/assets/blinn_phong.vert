@@ -16,8 +16,11 @@ uniform mat4 View;
 uniform mat4 Projection;
 uniform mat3 Normal; //convert to eye space
 
+
+
 void main(void)
 {
+	//ex_Normal = vec3(Normal * vec4(in_Normal, 0.0));
 	ex_Normal = Normal * in_Normal;
 	gl_Position = Projection * View * Model * vec4(in_Position, 1.0);
 }

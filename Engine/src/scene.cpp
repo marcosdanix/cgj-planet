@@ -102,7 +102,7 @@ void cgj::Node::draw(Camera& camera)
 		if (!node->shader_.empty()) {	
 			node->shader_.use();			
 				//uniform attributes
-			mat4 normal = transpose(it.inverse() * camera.inverseView());
+			mat3 normal = mat3(transpose(it.inverse() * camera.inverseView()));
 			node->shader_
 				.uniform(ModelAttributeName, it.matrix())
 				.uniform(ViewAttributeName, camera.view())
