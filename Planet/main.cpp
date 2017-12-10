@@ -78,8 +78,11 @@ void timerRefreshWindow()
 	glutTimerFunc(1000, timer, 0);
 }
 
+void update();
+
 void timerFPS()
 {
+	update();
 	glutPostRedisplay();
 	glutTimerFunc(16, timer, 1);
 }
@@ -234,6 +237,7 @@ void setupCallbacks()
 	//glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0, timer, 0);
+	glutTimerFunc(16, timer, 1);
 	glutKeyboardFunc(keyboard);
 	glutKeyboardUpFunc(keyboardUp);
 	glutSpecialFunc(special);
@@ -247,12 +251,12 @@ void setupCallbacks()
 
 /////////////////////////////////////////////////////////////////////// ENGINE SETUP
 
-//#define VERT_SHADER_FILE "assets/basic_shader.vert"
-//#define FRAG_SHADER_FILE "assets/basic_shader.frag"
+#define VERT_SHADER_FILE "assets/basic_shader.vert"
+#define FRAG_SHADER_FILE "assets/basic_shader.frag"
 //#define VERT_SHADER_FILE "assets/basic_color.vert"
 //#define FRAG_SHADER_FILE "assets/basic_color.frag"
-#define VERT_SHADER_FILE "assets/blinn_phong.vert"
-#define FRAG_SHADER_FILE "assets/blinn_phong.frag"
+//#define VERT_SHADER_FILE "assets/blinn_phong.vert"
+//#define FRAG_SHADER_FILE "assets/blinn_phong.frag"
 #define MUNKEY_FILE "assets/munkey.obj"	
 //#define MUNKEY_FILE "assets/icosphere.obj"	
 
@@ -307,6 +311,12 @@ void createScene()
 	scene.root()->addChild(&munkey);
 	
 	Storage<Scene>::instance().add("example", &scene);
+}
+
+//called from timerFPS()
+void update()
+{
+	munkey.transform().rotateY(1.0/60.0);
 }
 
 
