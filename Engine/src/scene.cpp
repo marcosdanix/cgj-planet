@@ -5,7 +5,7 @@ using namespace cgj;
 
 /////////////////////////////////////////////////////////////////////// Scene
 
-cgj::Scene::Scene()
+cgj::Scene::Scene(): camera_()
 {
 }
 
@@ -21,6 +21,11 @@ Node* Scene::root()
 void cgj::Scene::draw()
 {
 	root_.draw(camera_);
+}
+
+Camera & cgj::Scene::camera()
+{
+	return camera_;
 }
 
 /////////////////////////////////////////////////////////////////////// Node

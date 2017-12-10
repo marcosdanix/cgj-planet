@@ -68,6 +68,7 @@ namespace cgj {
 		Scene(Camera& camera, Transform& transform = Transform());
 		Node* root();
 		void draw();
+		Camera& camera();
 	private:
 		Node root_;
 		Camera camera_;
