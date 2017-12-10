@@ -78,7 +78,10 @@ void timerRefreshWindow()
 	glutTimerFunc(1000, timer, 0);
 }
 
-void update();
+void update()
+{
+	Storage<Scene>::instance().get("example")->update();
+}
 
 void timerFPS()
 {
@@ -303,20 +306,21 @@ void setupCamera()
 Scene scene;
 Node munkey;
 
+void munkeyUpdate(Node& munkey)
+{
+	munkey.transform().rotateY(1.0f / 60.0f);
+}
+
+
 void createScene()
 {
 	scene = Scene(camera);
 	munkey.mesh(*Storage<Mesh>::instance().get("munkey"));
 	munkey.shader(*Storage<ShaderProgram>::instance().get("basic"));
+	munkey.updateFunc(munkeyUpdate);
 	scene.root()->addChild(&munkey);
 	
 	Storage<Scene>::instance().add("example", &scene);
-}
-
-//called from timerFPS()
-void update()
-{
-	munkey.transform().rotateY(1.0/60.0);
 }
 
 

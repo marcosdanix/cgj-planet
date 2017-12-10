@@ -23,6 +23,11 @@ void cgj::Scene::draw()
 	root_.draw(camera_);
 }
 
+void cgj::Scene::update()
+{
+	root_.update();
+}
+
 Camera & cgj::Scene::camera()
 {
 	return camera_;
@@ -107,6 +112,8 @@ void cgj::Node::draw(Camera& camera)
 		if (!node->shader_.empty()) {	
 			node->shader_.use();			
 				//uniform attributes
+			if (node->before_) node->before_();
+
 			mat3 normal = mat3(transpose(it.inverse() * camera.inverseView()));
 			node->shader_
 				.uniform(ModelAttributeName, it.matrix())
@@ -115,9 +122,23 @@ void cgj::Node::draw(Camera& camera)
 				.uniform(NormalAttributeName, normal);
 			
 			node->mesh_.draw();
+
+			if (node->after_) node->after_();
+
 			node->shader_.stop();
 		}
 		
+		it.next();
+	}
+}
+
+void cgj::Node::update()
+{
+	NodeIterator it(this);
+
+	while (!it.isEnd()) {
+		Node* node = it.get();
+		if (node->update_) node->update_(*this);
 		it.next();
 	}
 }
@@ -142,6 +163,24 @@ Node & cgj::Node::mesh(Mesh & mesh)
 Node & cgj::Node::shader(ShaderProgram & shader)
 {
 	shader_ = shader;
+	return *this;
+}
+
+Node & cgj::Node::beforeDraw(std::function<void()> before)
+{
+	before_ = before;
+	return *this;
+}
+
+Node & cgj::Node::afterDraw(std::function<void()> after)
+{
+	after_ = after;
+	return *this;
+}
+
+Node & cgj::Node::updateFunc(std::function<void(Node&)> update)
+{
+	update_ = update;
 	return *this;
 }
 

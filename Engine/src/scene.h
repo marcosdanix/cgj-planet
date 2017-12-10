@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <stack>
+#include <functional>
 #include <glm/fwd.hpp>
 #include "transform.h"
 #include "shader.h"
@@ -41,13 +42,15 @@ namespace cgj {
 		void removeNodeList();
 
 		void draw(Camera& camera);
+		void update();
 
 		Transform& transform();
-		mat4 matrix();
-		mat4 inverse();
 		Node& transform(Transform& t);
 		Node& mesh(Mesh& mesh);
 		Node& shader(ShaderProgram& shader);
+		Node& beforeDraw(std::function<void()> before);
+		Node& afterDraw(std::function<void()> after);
+		Node& updateFunc(std::function<void(Node&)> update);
 	private:
 		//Intrusive lists are not just a meme (quoting Game Engine Architecture)
 		//This list is also circular FYI
@@ -60,6 +63,11 @@ namespace cgj {
 		Transform transform_;
 		Mesh mesh_;
 		ShaderProgram shader_;
+		//Is this game engine-y?
+		//They are just function pointers... right?
+		std::function<void()> before_;
+		std::function<void()> after_;
+		std::function<void(Node&)> update_;
 	};
 
 	class Scene {
@@ -68,6 +76,7 @@ namespace cgj {
 		Scene(Camera& camera, Transform& transform = Transform());
 		Node* root();
 		void draw();
+		void update();
 		Camera& camera();
 	private:
 		Node root_;
