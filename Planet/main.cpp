@@ -258,11 +258,13 @@ void setupCallbacks()
 //#define FRAG_SHADER_FILE "assets/basic_shader.frag"
 //#define VERT_SHADER_FILE "assets/basic_color.vert"
 //#define FRAG_SHADER_FILE "assets/basic_color.frag"
-#define VERT_SHADER_FILE "assets/blinn_phong.vert"
-#define FRAG_SHADER_FILE "assets/blinn_phong.frag"
+#define VERT_LAND_FILE "assets/blinn_phong.vert"
+#define FRAG_LAND_FILE "assets/blinn_phong.frag"
 //#define MUNKEY_FILE "assets/munkey.obj"	
 //#define MUNKEY_FILE "assets/bunny.obj"	
-#define MUNKEY_FILE "assets/icosphere.obj"	
+//#define MUNKEY_FILE "assets/icosphere.obj"	
+#define LAND_FILE "assets/icosphere2.obj"	
+#define WATER_FILE "assets/icosphere.obj"
 
 ShaderProgram shaderProgram;
 VertexShader vertexShader;
@@ -270,8 +272,8 @@ FragmentShader fragmentShader;
 
 void createShaderProgram()
 {
-	vertexShader.load(VERT_SHADER_FILE);
-	fragmentShader.load(FRAG_SHADER_FILE);
+	vertexShader.load(VERT_LAND_FILE);
+	fragmentShader.load(FRAG_LAND_FILE);
 
 	shaderProgram.create()
 		.attach(&vertexShader) //if it's not compiled, it compiles the shader
@@ -282,18 +284,21 @@ void createShaderProgram()
 	
 	//Add to the storage so it can be accessed by the rest of the engine
 	//It's not necessary, but it's being used to test this feature
-	Storage<ShaderProgram>::instance().add("basic", &shaderProgram);
+	Storage<ShaderProgram>::instance().add("land", &shaderProgram);
 }
 
-Mesh munkey_mesh;
+Mesh land_mesh;
+Mesh water_mesh;
 
 void createMeshes()
 {
-	PerlinFilter perlin(2.0f, 0.15f, 5);
+	PerlinFilter perlin(3.0f, 0.15f, 7);
 
-	munkey_mesh.load(MUNKEY_FILE, perlin);
+	land_mesh.load(LAND_FILE, perlin);
+	water_mesh.load(WATER_FILE);
 
-	Storage<Mesh>::instance().add("munkey", &munkey_mesh);
+	Storage<Mesh>::instance().add("land",  &land_mesh);
+	Storage<Mesh>::instance().add("water", &water_mesh);
 }
 
 
@@ -307,9 +312,10 @@ void setupCamera()
 }
 
 Scene scene;
-Node munkey;
+Node land;
+Node water;
 
-void munkeyUpdate(Node& munkey)
+void planetRotate(Node& munkey)
 {
 	munkey.transform().rotateY(1.0f / 60.0f);
 }
@@ -318,10 +324,14 @@ void munkeyUpdate(Node& munkey)
 void createScene()
 {
 	scene = Scene(camera);
-	munkey.mesh(*Storage<Mesh>::instance().get("munkey"));
-	munkey.shader(*Storage<ShaderProgram>::instance().get("basic"));
-	munkey.updateFunc(munkeyUpdate);
-	scene.root()->addChild(&munkey);
+	land.mesh(*Storage<Mesh>::instance().get("land"));
+	land.shader(*Storage<ShaderProgram>::instance().get("land"));
+	land.updateFunc(planetRotate);
+	scene.root()->addChild(&land);
+
+	water.mesh(*Storage<Mesh>::instance().get("water"));
+	water.shader(*Storage<ShaderProgram>::instance().get("land"));
+	land.addChild(&water);
 	
 	Storage<Scene>::instance().add("example", &scene);
 }
