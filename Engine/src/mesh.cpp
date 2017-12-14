@@ -214,9 +214,10 @@ void cgj::MeshParser::parseFace(std::stringstream & sin)
 }
 
 
-cgj::PerlinFilter::PerlinFilter(float freq, float amplitude, int iterations, float decay):
+cgj::PerlinFilter::PerlinFilter(float freq, float amplitude, float add, int iterations, float decay):
 	freq_(freq),
 	amplitude_(amplitude),
+	add_(add),
 	iterations_(iterations),
 	decay_(decay)
 {
@@ -242,7 +243,7 @@ std::vector<vec3> cgj::PerlinFilter::extendVertices()
 			isVertexModified[j] = true;
 			vec3 normal = parser_->normalData[parser_->normalIdx[i] - 1];
 			vec3 pos = parser_->vertexData[j];
-			pos += normal * amplitude_*perlin(pos, freq_, iterations_, decay_);
+			pos += normal * (add_ + amplitude_*perlin(pos, freq_, iterations_, decay_));
 			modifiedVertices[j] = pos;
 		}
 	}

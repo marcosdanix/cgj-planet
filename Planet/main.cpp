@@ -292,7 +292,7 @@ Mesh water_mesh;
 
 void createMeshes()
 {
-	PerlinFilter perlin(3.0f, 0.15f, 7);
+	PerlinFilter perlin(1.5f, 0.19f, -0.03f, 8);
 
 	land_mesh.load(LAND_FILE, perlin);
 	water_mesh.load(WATER_FILE);

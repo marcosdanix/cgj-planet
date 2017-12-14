@@ -72,11 +72,12 @@ namespace cgj {
 
 	class PerlinFilter : public MeshFilter {
 	public:
-		PerlinFilter(float freq, float amplitude, int iterations=1, float decay=2.0f);
+		PerlinFilter(float freq, float amplitude, float add, int iterations=1, float decay=2.0f);
 		void filter();
 	private:
 		float freq_;
 		float amplitude_;
+		float add_;
 		int iterations_;
 		float decay_;
 		std::vector<vec3> extendVertices();
