@@ -27,6 +27,7 @@ void main()
 {
 	vec3 normal = normalize(ex_Normal);
 	vec2 blinnPhong = blinnPhong(normal, Light, 1.0, 1.0, 32.0);
-	vec2 backkPhong = blinnPhong(normal, -Light, 0.5, 0.5, 32.0);
-	out_Color = Ambient * Color + (blinnPhong.x+backkPhong.x) * Color + (blinnPhong.y+backkPhong.y) * White;
+	//vec2 backkPhong = blinnPhong(normal, -Light, 0.5, 0.5, 32.0);
+	//out_Color = Ambient * Color + (blinnPhong.x+backkPhong.x) * Color + (blinnPhong.y+backkPhong.y) * White;
+	out_Color = Ambient * Color + blinnPhong.x * Color + blinnPhong.y * White;
 }
