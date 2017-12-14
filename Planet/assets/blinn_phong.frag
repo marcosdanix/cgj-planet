@@ -9,10 +9,14 @@ in vec3 ex_Normal;
 //Fragment shader output
 out vec4 out_Color;
 
-const vec3 Light = normalize(vec3(1, 0, 1));
-const vec4 Color = vec4(0.6,0.1,0,1);
-const vec4 White = vec4(0.5,0.5,0,1);
+const vec3 Light = normalize(vec3(1, 1, 1));
+const vec4 Color = vec4(0.7,0.4,0.1,1);
+//const vec4 White = vec4(0.5,0.5,0,1);
+const vec4 White = vec4(0.25,0,0,1);
+
 const float Ambient = 0.1;
+
+  
 
 vec2 blinnPhong(vec3 normal, vec3 light, float kD, float kS, float shininess)
 {
@@ -40,9 +44,9 @@ float OrenNayarDir(vec3 lightDir, vec3 normal, float exponent)
 void main()
 {
 	vec3 normal = normalize(ex_Normal);
-	vec2 blinnPhong = blinnPhong(normal, Light, 1.0, 0.1, 4.0);
+	vec2 blinnPhong = blinnPhong(normal, Light, 1.0, 0.1, 11.0);
 	//vec2 backkPhong = blinnPhong(normal, -Light, 0.5, 0.5, 32.0);
 	//out_Color = Ambient * Color + (blinnPhong.x+backkPhong.x) * Color + (blinnPhong.y+backkPhong.y) * White;
 	//out_Color = Ambient * Color + blinnPhong.x * Color + blinnPhong.y * White;
-	out_Color = Ambient * Color + OrenNayarDir(Light, normal, 0.5) * Color + blinnPhong.y * White;
+	out_Color = Ambient * Color + OrenNayarDir(Light, normal, 1.6) * Color + blinnPhong.y * White;
 }

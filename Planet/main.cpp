@@ -260,6 +260,7 @@ void setupCallbacks()
 //#define FRAG_SHADER_FILE "assets/basic_color.frag"
 #define VERT_LAND_FILE "assets/blinn_phong.vert"
 #define FRAG_LAND_FILE "assets/blinn_phong.frag"
+#define FRAG_WATER_FILE "assets/water_bp.frag"
 //#define MUNKEY_FILE "assets/munkey.obj"	
 //#define MUNKEY_FILE "assets/bunny.obj"	
 //#define MUNKEY_FILE "assets/icosphere.obj"	
@@ -269,6 +270,10 @@ void setupCallbacks()
 ShaderProgram shaderProgram;
 VertexShader vertexShader;
 FragmentShader fragmentShader;
+
+ShaderProgram waterShaderProgram;
+VertexShader waterVertexShader;
+FragmentShader waterFragmentShader;
 
 void createShaderProgram()
 {
@@ -285,6 +290,21 @@ void createShaderProgram()
 	//Add to the storage so it can be accessed by the rest of the engine
 	//It's not necessary, but it's being used to test this feature
 	Storage<ShaderProgram>::instance().add("land", &shaderProgram);
+
+
+	waterVertexShader.load(VERT_LAND_FILE);
+	waterFragmentShader.load(FRAG_WATER_FILE);
+
+	waterShaderProgram.create()
+		.attach(&waterVertexShader) //if it's not compiled, it compiles the shader
+		.attach(&waterFragmentShader)
+		.bindAttribute(VERTICES, "in_Position")
+		.bindAttribute(NORMALS, "in_Normal")
+		.link();
+
+	//Add to the storage so it can be accessed by the rest of the engine
+	//It's not necessary, but it's being used to test this feature
+	Storage<ShaderProgram>::instance().add("water", &waterShaderProgram);
 }
 
 Mesh land_mesh;
@@ -330,7 +350,7 @@ void createScene()
 	scene.root()->addChild(&land);
 
 	water.mesh(*Storage<Mesh>::instance().get("water"));
-	water.shader(*Storage<ShaderProgram>::instance().get("land"));
+	water.shader(*Storage<ShaderProgram>::instance().get("water"));
 	land.addChild(&water);
 	
 	Storage<Scene>::instance().add("example", &scene);
