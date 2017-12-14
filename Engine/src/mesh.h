@@ -71,6 +71,7 @@ namespace cgj {
 	};
 
 	class PerlinFilter : public MeshFilter {
+	public:
 		PerlinFilter(float freq, float amplitude, int iterations=1, float decay=2.0f);
 		void filter();
 	private:

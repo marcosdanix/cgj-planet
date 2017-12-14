@@ -240,7 +240,7 @@ std::vector<vec3> cgj::PerlinFilter::extendVertices()
 		unsigned int j = parser_->vertexIdx[i] - 1;
 		if (!isVertexModified[j]) {
 			isVertexModified[j] = true;
-			vec3 normal = parser_->normalData[j];
+			vec3 normal = parser_->normalData[parser_->normalIdx[i] - 1];
 			vec3 pos = parser_->vertexData[j];
 			pos += normal * amplitude_*perlin(pos, freq_, iterations_, decay_);
 			modifiedVertices[j] = pos;
