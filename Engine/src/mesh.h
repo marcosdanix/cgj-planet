@@ -11,11 +11,16 @@ using namespace glm;
 
 namespace cgj {
 	
+	class MeshParser;
+	class MeshFilter;
+
 	class Mesh {
 	public:
 		Mesh();
 		~Mesh();
+		Mesh& operator=(Mesh& m);
 		void load(std::string filename);
+		void load(std::string filename, MeshFilter& filter);
 		void draw();
 	private:
 		std::vector<vec3> Vertices;
@@ -25,9 +30,12 @@ namespace cgj {
 		GLuint VaoId;
 		GLuint VboVertices, VboTexcoords, VboNormals;
 
-		int count;
+		size_t count;
 
 		void createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded);
+		
+		MeshFilter& filter_;
+		static MeshFilter unitfilter;
 	};
 
 	class MeshParser {
@@ -35,7 +43,6 @@ namespace cgj {
 		MeshParser(std::string filename);
 		~MeshParser();
 		void parse();
-
 		bool TexcoordsLoaded;
 		bool NormalsLoaded;
 		std::vector<vec3> vertexData;
@@ -50,5 +57,28 @@ namespace cgj {
 		void parseFace(std::stringstream& sin);
 
 		std::ifstream input;
+	};
+
+	class MeshFilter {
+	public:
+		virtual ~MeshFilter() {}
+		virtual void filter() { vertexData = parser_->vertexData; normalData = parser_->normalData; }
+		void parser(MeshParser* parser) { parser_ = parser; }
+		std::vector<vec3> vertexData;
+		std::vector<vec3> normalData;
+	protected:
+		MeshParser* parser_;
+	};
+
+	class PerlinFilter : public MeshFilter {
+		PerlinFilter(float freq, float amplitude, int iterations=1, float decay=2.0f);
+		void filter();
+	private:
+		float freq_;
+		float amplitude_;
+		int iterations_;
+		float decay_;
+		std::vector<vec3> extendVertices();
+		std::vector<vec3> recalculateNormals();
 	};
 }

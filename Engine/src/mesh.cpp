@@ -1,7 +1,9 @@
 #include "mesh.h"
 #include "error.h"
+#include "util.h"
 #include <sstream>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/fast_square_root.hpp>
 
 using namespace cgj;
 
@@ -11,7 +13,9 @@ using namespace cgj;
 
 /////////////////////////////////////////////////////////////////////// Mesh
 
-cgj::Mesh::Mesh(): VaoId(0), VboVertices(0), VboTexcoords(0), VboNormals(0), count(0)
+MeshFilter cgj::Mesh::unitfilter;
+
+cgj::Mesh::Mesh(): VaoId(0), VboVertices(0), VboTexcoords(0), VboNormals(0), count(0), filter_(Mesh::unitfilter)
 {
 }
 
@@ -29,25 +33,52 @@ Mesh::~Mesh()
 	glBindVertexArray(0);
 }
 
+Mesh & cgj::Mesh::operator=(Mesh & m)
+{
+	Vertices = m.Vertices;
+	Texcoords = m.Texcoords;
+	Normals = m.Normals;
+
+	VaoId = m.VaoId;
+	VboVertices = m.VboVertices;
+	VboTexcoords = m.VboTexcoords;
+	VboNormals = m.VboNormals;
+
+	count = m.count;
+	filter_ = m.filter_;
+
+	return *this;
+}
+
 void Mesh::load(std::string filename)
 {
+	load(filename, filter_);
+}
+
+void Mesh::load(std::string filename, MeshFilter& filter)
+{
 	MeshParser parser(filename);
+	filter_ = filter;
+	
 	parser.parse();
+	
+	filter.parser(&parser);
+	filter.filter();
 
 	for (unsigned int i = 0; i < parser.vertexIdx.size(); i++) {
 		unsigned int vi = parser.vertexIdx[i];
-		vec3 v = parser.vertexData[vi - 1];
+		vec3 v = filter.vertexData[vi - 1];
 		Vertices.push_back(v);
-		
+
 		if (parser.TexcoordsLoaded) {
 			unsigned int ti = parser.texcoordIdx[i];
 			vec2 t = parser.texcoordData[ti - 1];
 			Texcoords.push_back(t);
 		}
-		
+
 		if (parser.NormalsLoaded) {
 			unsigned int ni = parser.normalIdx[i];
-			vec3 n = parser.normalData[ni - 1];
+			vec3 n = filter.normalData[ni - 1];
 			Normals.push_back(n);
 		}
 	}
@@ -180,4 +211,64 @@ void cgj::MeshParser::parseFace(std::stringstream & sin)
 		std::getline(sin, token, ' ');
 		if (token.size() > 0) normalIdx.push_back(std::stoi(token));
 	}
+}
+
+
+cgj::PerlinFilter::PerlinFilter(float freq, float amplitude, int iterations, float decay):
+	freq_(freq),
+	amplitude_(amplitude),
+	iterations_(iterations),
+	decay_(decay)
+{
+}
+
+void cgj::PerlinFilter::filter()
+{
+	this->vertexData = extendVertices();
+	this->normalData = recalculateNormals();
+}
+
+
+std::vector<vec3> cgj::PerlinFilter::extendVertices()
+{
+	if (!parser_->NormalsLoaded) return std::vector<vec3>();
+
+	std::vector<vec3> modifiedVertices(parser_->vertexData.size());
+	std::vector<bool> isVertexModified(parser_->vertexData.size(), false);
+
+	for (int i = 0; i < parser_->vertexIdx.size(); ++i) {
+		unsigned int j = parser_->vertexIdx[i] - 1;
+		if (!isVertexModified[j]) {
+			isVertexModified[j] = true;
+			vec3 normal = parser_->normalData[j];
+			vec3 pos = parser_->vertexData[j];
+			pos += normal * amplitude_*perlin(pos, freq_, iterations_, decay_);
+			modifiedVertices[j] = pos;
+		}
+	}
+
+	return modifiedVertices;
+}
+
+std::vector<vec3> cgj::PerlinFilter::recalculateNormals()
+{
+	std::vector<vec3> modifiedNormals(parser_->normalData.size(), vec3(0.0));
+
+	for (int i = 0; i < parser_->vertexIdx.size(); i += 3) {
+		vec3 v0 = vertexData[parser_->vertexIdx[i] - 1];
+		vec3 v1 = vertexData[parser_->vertexIdx[i + 1] - 1];
+		vec3 v2 = vertexData[parser_->vertexIdx[i + 2] - 1];
+		vec3 u = v1 - v0;
+		vec3 v = v2 - v0;
+		vec3 n = fastNormalize(cross(u, v));
+		modifiedNormals[parser_->normalIdx[i] - 1] += n;
+		modifiedNormals[parser_->normalIdx[i + 1] - 1] += n;
+		modifiedNormals[parser_->normalIdx[i + 2] - 1] += n;
+	}
+
+	for (int i = 0; i < modifiedNormals.size(); ++i) {
+		modifiedNormals[i] = normalize(modifiedNormals[i]);
+	}
+
+	return modifiedNormals;
 }
