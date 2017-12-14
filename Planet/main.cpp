@@ -289,7 +289,7 @@ Mesh munkey_mesh;
 
 void createMeshes()
 {
-	PerlinFilter perlin(2.0f, 0.15f,4);
+	PerlinFilter perlin(2.0f, 0.15f, 5);
 
 	munkey_mesh.load(MUNKEY_FILE, perlin);
 
