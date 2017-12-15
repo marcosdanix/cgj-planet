@@ -16,9 +16,11 @@ using namespace cgj;
 #define TEXCOORDS 1
 #define NORMALS 2
 
-int WinX = 640, WinY = 480;
+int WinX = 800, WinY = 600;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
+float zoom = 1.5;
+float aspect;
 
 //STUFF
 
@@ -52,17 +54,22 @@ void idle()
 	//glutPostRedisplay();
 }
 
+void recalculateProjection()
+{	
+	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, -4.0f, 4.0f);
+	//A bit of a mouthful
+	Storage<Scene>::instance().get("example")->camera().projection(projection);
+}
+
 //glutReshapeFunc
 void reshape(int w, int h)
 {
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-	
-	float aspect = float(w) / float(h);
-	mat4 projection = glm::ortho(-aspect*2.0, aspect*2.0, -2.0, 2.0, -2.0, 4.0);
-	//A bit of a mouthful
-	Storage<Scene>::instance().get("example")->camera().projection(projection);
+	aspect = float(w) / float(h);
+
+	recalculateProjection();	
 }
 
 void timer(int value);
@@ -141,7 +148,8 @@ void mouseWheel(int wheel, int direction, int x, int y)
 {
 	//wheel is wheel number (useless)
 	//direction is +/- 1
-
+	zoom -= 0.05*direction;
+	recalculateProjection();
 }
 
 //glutMotionFunc
@@ -154,6 +162,15 @@ void motion(int x, int y)
 //mouse motion WHILE NOT pressing a mouse button
 void passiveMotion(int x, int y)
 {
+	static int centerX = glutGet(GLUT_WINDOW_WIDTH) / 2;
+	static int centerY = glutGet(GLUT_WINDOW_HEIGHT) / 2;
+
+	if (x != centerX || y != centerY) glutWarpPointer(centerX, centerY);
+
+	float rotx = x - centerX;
+	float roty = y - centerY;
+
+	orbit.rotate(rotx, roty);
 }
 
 //glutWindowStatusFunc
@@ -260,6 +277,7 @@ void setupCallbacks()
 //#define FRAG_SHADER_FILE "assets/basic_color.frag"
 #define VERT_LAND_FILE "assets/blinn_phong.vert"
 #define FRAG_LAND_FILE "assets/blinn_phong.frag"
+//#define FRAG_LAND_FILE "assets/height_shader.frag"
 #define FRAG_WATER_FILE "assets/water_bp.frag"
 //#define MUNKEY_FILE "assets/munkey.obj"	
 //#define MUNKEY_FILE "assets/bunny.obj"	
@@ -312,7 +330,8 @@ Mesh water_mesh;
 
 void createMeshes()
 {
-	PerlinFilter perlin(1.5f, 0.19f, -0.03f, 8);
+	PerlinFilter perlin(1.5f, 0.19f, -0.025f, 8, 1.8);
+
 
 	land_mesh.load(LAND_FILE, perlin);
 	water_mesh.load(WATER_FILE);
@@ -325,9 +344,9 @@ void createMeshes()
 
 void setupCamera()
 {
-	float aspect = float(WinX) / float(WinY);
-	mat4 projection = glm::ortho(-aspect*2.0, aspect*2.0, -2.0, 2.0, -2.0, 4.0);
-	orbit = OrbitControl(2.0f, 0.0f, 0.0f);
+	aspect = float(WinX) / float(WinY);
+	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, -4.0f, 4.0f);
+	orbit = OrbitControl(2.0f, 0.5f, 0.0f);
 	camera = Camera(&orbit, projection);
 }
 
@@ -337,7 +356,7 @@ Node water;
 
 void planetRotate(Node& munkey)
 {
-	munkey.transform().rotateY(1.0f / 60.0f);
+	munkey.transform().rotateY(0.1f / 60.0f);
 }
 
 
