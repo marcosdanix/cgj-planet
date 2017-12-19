@@ -272,15 +272,17 @@ void setupCallbacks()
 
 /////////////////////////////////////////////////////////////////////// ENGINE SETUP
 
-#define VERT_LAND_FILE "assets/basic_shader.vert"
-#define FRAG_LAND_FILE "assets/basic_shader.frag"
-//#define VERT_LAND_FILE "assets/basic_color.vert"
-//#define FRAG_LAND_FILE "assets/basic_color.frag"
-//#define VERT_LAND_FILE "assets/blinn_phong.vert"
-//#define FRAG_LAND_FILE "assets/blinn_phong.frag"
+//#define VERT_LAND_FILE "assets/basic_shader.vert"
+//#define FRAG_LAND_FILE "assets/basic_shader.frag"
+//#define VERT_WATER_FILE "assets/basic_shader.vert"
+//#define FRAG_WATER_FILE "assets/basic_shader.frag"
+#define VERT_LAND_FILE "assets/blinn_phong.vert"
+#define FRAG_LAND_FILE "assets/blinn_phong.frag"
 //#define FRAG_LAND_FILE "assets/height_shader.frag"
-#define VERT_WATER_FILE "assets/blinn_phong.vert"
-#define FRAG_WATER_FILE "assets/water_bp.frag"
+//#define VERT_WATER_FILE "assets/blinn_phong.vert"
+//#define FRAG_WATER_FILE "assets/water_bp.frag"
+#define VERT_WATER_FILE "assets/water_bump.vert"
+#define FRAG_WATER_FILE "assets/water_bump.frag"
 #define LAND_FILE "assets/icosphere2.obj"	
 #define WATER_FILE "assets/icosphere.obj"
 
@@ -332,10 +334,11 @@ Mesh water_mesh;
 void createMeshes()
 {
 	PerlinFilter perlin(1.5f, 0.19f, -0.025f, 8, 1.8);
+	SphericalTangentFilter sphere;
 
 
 	land_mesh.load(LAND_FILE, perlin);
-	water_mesh.load(WATER_FILE);
+	water_mesh.load(WATER_FILE, sphere);
 
 	Storage<Mesh>::instance().add("land",  &land_mesh);
 	Storage<Mesh>::instance().add("water", &water_mesh);

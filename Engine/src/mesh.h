@@ -94,12 +94,10 @@ namespace cgj {
 		void calculateTangent();
 	};
 
-	/*
+	
 	class SphericalTangentFilter : public MeshFilter {
 	public:
 		void filter();
-	private:
-		std::vector<vec3> tangentData_;
 	};
-	*/
+	
 }

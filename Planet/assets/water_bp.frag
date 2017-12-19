@@ -5,6 +5,7 @@ in vec3 ex_Position;
 //in vec3 ex_Texcoord;
 in vec3 ex_Normal;
 //in float ex_Diffuse;
+in vec3 ex_Tangent;
 
 //Fragment shader output
 out vec4 out_Color;

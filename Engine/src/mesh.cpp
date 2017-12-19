@@ -306,6 +306,7 @@ void cgj::PerlinFilter::recalculateNormals()
 	}
 }
 
+
 void cgj::PerlinFilter::calculateTangent()
 {
 	//Remember that the normal was altered by the topology
@@ -327,10 +328,11 @@ void cgj::PerlinFilter::calculateTangent()
 		//old position and new normal
 		vec3 p = parser_->vertexData[j]; //position in the sphere
 		vec3 n = normalData_[parser_->normalIdx[i] - 1]; //normal after applying noise
+		//coordinates in the spherical surface (ISO/physics notation adjusted for OpenGL)
 		float theta = acos(p.y);
 		float phi = atan(p.x, p.z);
 		
-		//tentative tangent
+		//tentative tangent - partial derivative on theta
 		vec3 t = vec3(cos(theta)*sin(phi), -sin(theta), cos(theta)*cos(phi));
 		//bitangent
 		vec3 b = normalize(cross(n, t));
@@ -339,4 +341,29 @@ void cgj::PerlinFilter::calculateTangent()
 		tangentData_[j] = T;
 
 	}
+}
+
+void cgj::SphericalTangentFilter::filter()
+{
+	MeshFilter::filter();
+
+	if (!parser_->NormalsLoaded) return;
+	tangentData_.resize(parser_->vertexData.size());
+	std::vector<bool> isVertexModified(parser_->vertexData.size(), false);
+
+	for (int i = 0; i < parser_->vertexIdx.size(); ++i) {
+		unsigned int j = parser_->vertexIdx[i] - 1;
+		if (isVertexModified[j]) continue;
+		isVertexModified[j] = true;
+
+		vec3 p = parser_->vertexData[j];
+		//coordinates in the spherical surface (ISO/physics notation adjusted for OpenGL)
+		float theta = acos(p.y);
+		float phi = atan(p.x, p.z);
+
+		//partial derivative on theta
+		vec3 t = vec3(cos(theta)*sin(phi), -sin(theta), cos(theta)*cos(phi));
+		tangentData_[j] = t;
+	}
+
 }
