@@ -179,14 +179,14 @@ float noise(vec3 pos)
 										 grad(p[BB + 1],P - vec3(1.0, 1.0, 1.0)))));
 }
 
-float cgj::perlin(vec3 pos, float freq, int iterations, float decay)
+float cgj::perlin(vec3 pos, float freq, int iterations, float decay, vec3 add)
 {
 	float acc = 0.0f;
 	float fmul = 1.0f;
 	float nmul = 1.0f;
 
 	for (int i = 0; i < iterations; ++i) {
-		acc += nmul*noise(fmul*freq*pos);
+		acc += nmul*noise(fmul*freq*(pos + add));
 		nmul = pow(1.0f / decay, (float)(i + 1));
 		fmul *= 2.0;
 	}

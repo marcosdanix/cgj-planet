@@ -15,6 +15,7 @@ using namespace cgj;
 #define VERTICES 0
 #define TEXCOORDS 1
 #define NORMALS 2
+#define TANGENT 3
 
 int WinX = 800, WinY = 600;
 int WindowHandle = 0;
@@ -271,17 +272,15 @@ void setupCallbacks()
 
 /////////////////////////////////////////////////////////////////////// ENGINE SETUP
 
-//#define VERT_SHADER_FILE "assets/basic_shader.vert"
-//#define FRAG_SHADER_FILE "assets/basic_shader.frag"
-//#define VERT_SHADER_FILE "assets/basic_color.vert"
-//#define FRAG_SHADER_FILE "assets/basic_color.frag"
-#define VERT_LAND_FILE "assets/blinn_phong.vert"
-#define FRAG_LAND_FILE "assets/blinn_phong.frag"
+#define VERT_LAND_FILE "assets/basic_shader.vert"
+#define FRAG_LAND_FILE "assets/basic_shader.frag"
+//#define VERT_LAND_FILE "assets/basic_color.vert"
+//#define FRAG_LAND_FILE "assets/basic_color.frag"
+//#define VERT_LAND_FILE "assets/blinn_phong.vert"
+//#define FRAG_LAND_FILE "assets/blinn_phong.frag"
 //#define FRAG_LAND_FILE "assets/height_shader.frag"
+#define VERT_WATER_FILE "assets/blinn_phong.vert"
 #define FRAG_WATER_FILE "assets/water_bp.frag"
-//#define MUNKEY_FILE "assets/munkey.obj"	
-//#define MUNKEY_FILE "assets/bunny.obj"	
-//#define MUNKEY_FILE "assets/icosphere.obj"	
 #define LAND_FILE "assets/icosphere2.obj"	
 #define WATER_FILE "assets/icosphere.obj"
 
@@ -303,6 +302,7 @@ void createShaderProgram()
 		.attach(&fragmentShader)
 		.bindAttribute(VERTICES, "in_Position")
 		.bindAttribute(NORMALS, "in_Normal")
+		.bindAttribute(TANGENT, "in_Tangent")
 		.link();
 	
 	//Add to the storage so it can be accessed by the rest of the engine
@@ -310,7 +310,7 @@ void createShaderProgram()
 	Storage<ShaderProgram>::instance().add("land", &shaderProgram);
 
 
-	waterVertexShader.load(VERT_LAND_FILE);
+	waterVertexShader.load(VERT_WATER_FILE);
 	waterFragmentShader.load(FRAG_WATER_FILE);
 
 	waterShaderProgram.create()
@@ -318,6 +318,7 @@ void createShaderProgram()
 		.attach(&waterFragmentShader)
 		.bindAttribute(VERTICES, "in_Position")
 		.bindAttribute(NORMALS, "in_Normal")
+		.bindAttribute(TANGENT, "in_Tangent")
 		.link();
 
 	//Add to the storage so it can be accessed by the rest of the engine

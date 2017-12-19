@@ -10,12 +10,13 @@ using namespace cgj;
 #define VERTICES 0
 #define TEXCOORDS 1
 #define NORMALS 2
+#define TANGENT 3
 
 /////////////////////////////////////////////////////////////////////// Mesh
 
 MeshFilter cgj::Mesh::unitfilter;
 
-cgj::Mesh::Mesh(): VaoId(0), VboVertices(0), VboTexcoords(0), VboNormals(0), count(0), filter_(Mesh::unitfilter)
+cgj::Mesh::Mesh(): VaoId(0), VboVertices(0), VboTexcoords(0), VboNormals(0), VboTangent(0), count(0), filter_(Mesh::unitfilter)
 {
 }
 
@@ -25,9 +26,11 @@ Mesh::~Mesh()
 	glDisableVertexAttribArray(VERTICES);
 	glDisableVertexAttribArray(TEXCOORDS);
 	glDisableVertexAttribArray(NORMALS);
+	glDisableVertexAttribArray(TANGENT);
 	glDeleteBuffers(1, &VboVertices);
 	glDeleteBuffers(1, &VboTexcoords);
 	glDeleteBuffers(1, &VboNormals);
+	glDeleteBuffers(1, &VboTangent);
 	glDeleteVertexArrays(1, &VaoId);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -38,11 +41,13 @@ Mesh & cgj::Mesh::operator=(Mesh & m)
 	Vertices = m.Vertices;
 	Texcoords = m.Texcoords;
 	Normals = m.Normals;
+	Tangent = m.Tangent;
 
 	VaoId = m.VaoId;
 	VboVertices = m.VboVertices;
 	VboTexcoords = m.VboTexcoords;
 	VboNormals = m.VboNormals;
+	VboTangent = m.VboTangent;
 
 	count = m.count;
 	filter_ = m.filter_;
@@ -67,7 +72,8 @@ void Mesh::load(std::string filename, MeshFilter& filter)
 
 	for (unsigned int i = 0; i < parser.vertexIdx.size(); i++) {
 		unsigned int vi = parser.vertexIdx[i];
-		vec3 v = filter.vertexData[vi - 1];
+		std::vector<vec3> &vertexData = *filter.vertexData;
+		vec3 v = vertexData[vi - 1];
 		Vertices.push_back(v);
 
 		if (parser.TexcoordsLoaded) {
@@ -78,8 +84,17 @@ void Mesh::load(std::string filename, MeshFilter& filter)
 
 		if (parser.NormalsLoaded) {
 			unsigned int ni = parser.normalIdx[i];
-			vec3 n = filter.normalData[ni - 1];
+			std::vector<vec3> &normalData = *filter.normalData;
+			vec3 n = normalData[ni - 1];
 			Normals.push_back(n);
+		}
+
+		if (filter.tangentData->size() > 0) {
+			//there's an associated tangent with each vertex
+			unsigned int vi = parser.vertexIdx[i];
+			std::vector<vec3> &tangentData = *filter.tangentData;
+			vec3 t = tangentData[vi - 1];
+			Tangent.push_back(t);
 		}
 	}
 
@@ -90,6 +105,7 @@ void Mesh::load(std::string filename, MeshFilter& filter)
 	Vertices.clear();
 	Texcoords.clear();
 	Normals.clear();
+	Tangent.clear();
 }
 
 void Mesh::draw()
@@ -137,6 +153,17 @@ void Mesh::createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded)
 			glVertexAttribPointer(NORMALS, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), 0);
 
 			PEEK_OPENGL_ERROR("Failed adding Normals Buffer")
+		}
+
+		if (Tangent.size() > 0)
+		{
+			glGenBuffers(1, &VboTangent);
+			glBindBuffer(GL_ARRAY_BUFFER, VboTangent);
+			glBufferData(GL_ARRAY_BUFFER, Tangent.size() * sizeof(vec3), &Tangent[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(TANGENT);
+			glVertexAttribPointer(TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), 0);
+
+			PEEK_OPENGL_ERROR("Failed adding Tangents Buffer")
 		}
 	}
 	glBindVertexArray(0);
@@ -213,6 +240,7 @@ void cgj::MeshParser::parseFace(std::stringstream & sin)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////// PerlinFilter
 
 cgj::PerlinFilter::PerlinFilter(float freq, float amplitude, float add, int iterations, float decay):
 	freq_(freq),
@@ -221,20 +249,26 @@ cgj::PerlinFilter::PerlinFilter(float freq, float amplitude, float add, int iter
 	iterations_(iterations),
 	decay_(decay)
 {
+	vertexData = &vertexData_;
+	normalData = &normalData_;
+	tangentData = &tangentData_;
 }
 
 void cgj::PerlinFilter::filter()
 {
-	this->vertexData = extendVertices();
-	this->normalData = recalculateNormals();
+	extendVertices();
+	recalculateNormals();
+	calculateTangent();
 }
 
+//const vec3 ADD(123.0f, 231.0f, 94.0f);
 
-std::vector<vec3> cgj::PerlinFilter::extendVertices()
+void cgj::PerlinFilter::extendVertices()
 {
-	if (!parser_->NormalsLoaded) return std::vector<vec3>();
+	if (!parser_->NormalsLoaded) return;
 
-	std::vector<vec3> modifiedVertices(parser_->vertexData.size());
+	//std::vector<vec3> modifiedVertices(parser_->vertexData.size());
+	vertexData_.resize(parser_->vertexData.size());
 	std::vector<bool> isVertexModified(parser_->vertexData.size(), false);
 
 	for (int i = 0; i < parser_->vertexIdx.size(); ++i) {
@@ -244,32 +278,65 @@ std::vector<vec3> cgj::PerlinFilter::extendVertices()
 			vec3 normal = parser_->normalData[parser_->normalIdx[i] - 1];
 			vec3 pos = parser_->vertexData[j];
 			pos += normal * (add_ + amplitude_*perlin(pos, freq_, iterations_, decay_));
-			modifiedVertices[j] = pos;
+			vertexData_[j] = pos;
 		}
 	}
-
-	return modifiedVertices;
 }
 
-std::vector<vec3> cgj::PerlinFilter::recalculateNormals()
+void cgj::PerlinFilter::recalculateNormals()
 {
-	std::vector<vec3> modifiedNormals(parser_->normalData.size(), vec3(0.0));
+	//std::vector<vec3> modifiedNormals(parser_->normalData.size(), vec3(0.0));
+	normalData_.resize(parser_->normalData.size());
 
 	for (int i = 0; i < parser_->vertexIdx.size(); i += 3) {
-		vec3 v0 = vertexData[parser_->vertexIdx[i] - 1];
-		vec3 v1 = vertexData[parser_->vertexIdx[i + 1] - 1];
-		vec3 v2 = vertexData[parser_->vertexIdx[i + 2] - 1];
+		vec3 v0 = (*vertexData)[parser_->vertexIdx[i] - 1];
+		vec3 v1 = (*vertexData)[parser_->vertexIdx[i + 1] - 1];
+		vec3 v2 = (*vertexData)[parser_->vertexIdx[i + 2] - 1];
 		vec3 u = v1 - v0;
 		vec3 v = v2 - v0;
 		vec3 n = fastNormalize(cross(u, v));
-		modifiedNormals[parser_->normalIdx[i] - 1] += n;
-		modifiedNormals[parser_->normalIdx[i + 1] - 1] += n;
-		modifiedNormals[parser_->normalIdx[i + 2] - 1] += n;
+		
+		normalData_[parser_->normalIdx[i] - 1] += n;
+		normalData_[parser_->normalIdx[i + 1] - 1] += n;
+		normalData_[parser_->normalIdx[i + 2] - 1] += n;
 	}
 
-	for (int i = 0; i < modifiedNormals.size(); ++i) {
-		modifiedNormals[i] = normalize(modifiedNormals[i]);
+	for (int i = 0; i < normalData_.size(); ++i) {
+		normalData_[i] = normalize(normalData_[i]);
 	}
+}
 
-	return modifiedNormals;
+void cgj::PerlinFilter::calculateTangent()
+{
+	//Remember that the normal was altered by the topology
+	//Create a tentative tangent as it was a sphere
+	//B' = normalize(N x T)
+	//return T' = B x N
+
+	if (!parser_->NormalsLoaded) return;
+	tangentData_.resize(parser_->vertexData.size());
+	std::vector<bool> isVertexModified(parser_->vertexData.size(), false);
+
+
+	for (int i = 0; i < parser_->vertexIdx.size(); ++i) {
+		
+		unsigned int j = parser_->vertexIdx[i] - 1;
+		if (isVertexModified[j]) continue;
+		isVertexModified[j] = true;
+		
+		//old position and new normal
+		vec3 p = parser_->vertexData[j]; //position in the sphere
+		vec3 n = normalData_[parser_->normalIdx[i] - 1]; //normal after applying noise
+		float theta = acos(p.y);
+		float phi = atan(p.x, p.z);
+		
+		//tentative tangent
+		vec3 t = vec3(cos(theta)*sin(phi), -sin(theta), cos(theta)*cos(phi));
+		//bitangent
+		vec3 b = normalize(cross(n, t));
+		//REAL tangent - this wouldn't work if there were 90º cliffs in the noise
+		vec3 T = cross(b, n);
+		tangentData_[j] = T;
+
+	}
 }

@@ -26,14 +26,15 @@ namespace cgj {
 		std::vector<vec3> Vertices;
 		std::vector<vec2> Texcoords;
 		std::vector<vec3> Normals;
+		std::vector<vec3> Tangent;
 
 		GLuint VaoId;
-		GLuint VboVertices, VboTexcoords, VboNormals;
+		GLuint VboVertices, VboTexcoords, VboNormals, VboTangent;
 
 		size_t count;
 
 		void createBufferObjects(bool TexcoordsLoaded, bool NormalsLoaded);
-		
+
 		MeshFilter& filter_;
 		static MeshFilter unitfilter;
 	};
@@ -62,12 +63,18 @@ namespace cgj {
 	class MeshFilter {
 	public:
 		virtual ~MeshFilter() {}
-		virtual void filter() { vertexData = parser_->vertexData; normalData = parser_->normalData; }
+		virtual void filter() { 
+			vertexData  = &parser_->vertexData; 
+			normalData  = &parser_->normalData; 
+			tangentData = &(this->tangentData_);
+		}
 		void parser(MeshParser* parser) { parser_ = parser; }
-		std::vector<vec3> vertexData;
-		std::vector<vec3> normalData;
+		std::vector<vec3>* vertexData;
+		std::vector<vec3>* normalData;
+		std::vector<vec3>* tangentData;
 	protected:
 		MeshParser* parser_;
+		std::vector<vec3> tangentData_;
 	};
 
 	class PerlinFilter : public MeshFilter {
@@ -80,7 +87,19 @@ namespace cgj {
 		float add_;
 		int iterations_;
 		float decay_;
-		std::vector<vec3> extendVertices();
-		std::vector<vec3> recalculateNormals();
+		std::vector<vec3> vertexData_;
+		std::vector<vec3> normalData_;
+		void extendVertices();
+		void recalculateNormals();
+		void calculateTangent();
 	};
+
+	/*
+	class SphericalTangentFilter : public MeshFilter {
+	public:
+		void filter();
+	private:
+		std::vector<vec3> tangentData_;
+	};
+	*/
 }

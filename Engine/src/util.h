@@ -38,5 +38,5 @@ namespace cgj {
 		std::stack<mat4> inverse_;
 	};
 
-	float perlin(vec3 pos, float freq, int iterations = 1, float decay = 2.0f);
+	float perlin(vec3 pos, float freq, int iterations = 1, float decay = 2.0f, vec3 add = vec3(0.0));
 }
