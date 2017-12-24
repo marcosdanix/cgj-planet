@@ -122,6 +122,14 @@ void keyboard(unsigned char key, int x, int y)
 void keyboardUp(unsigned char key, int x, int y)
 {
 	// glutGetModifiers for SHIFT, CTRL, ALT
+	if (key >= '0' && key <= '9') {
+		int digit = key - '0';
+		Storage<ShaderProgram>& storage = Storage<ShaderProgram>::instance();
+		for (auto it = storage.cbegin(); it != storage.cend(); ++it) {
+			it->second->use();
+			it->second->uniform("Mode", digit);
+		}
+	}
 }
 
 //glutSpecialFunc

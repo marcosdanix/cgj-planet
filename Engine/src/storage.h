@@ -12,6 +12,8 @@ namespace cgj {
 		Storage<T>& add(std::string name, T* item);
 		Storage<T>& remove(std::string name);
 		T* get(std::string name);
+		typename std::map<std::string, T*>::const_iterator cbegin();
+		typename std::map<std::string, T*>::const_iterator cend();
 		~Storage();
 	private:
 		std::map<std::string, T*> map_;
@@ -49,10 +51,22 @@ namespace cgj {
 	}
 
 	template<class T>
+	inline typename std::map<std::string, T*>::const_iterator Storage<T>::cbegin()
+	{
+		return map_.cbegin();
+	}
+
+	template<class T>
+	inline typename std::map<std::string, T*>::const_iterator Storage<T>::cend()
+	{
+		return map_.cend();
+	}
+
+	template<class T>
 	inline Storage<T>::~Storage()
 	{
-		for (auto item : map_.begin()) {
-			delete item;
+		for (auto item : map_) {
+			delete item.second;
 		}
 	}
 
