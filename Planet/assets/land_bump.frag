@@ -9,16 +9,15 @@ in vec3 Light;
 out vec4 out_Color;
 
 uniform mat3 Normal;
-uniform int Mode;
 
 //const vec3 Light = normalize(vec3(1, 1, 1));
-const vec4 Color = vec4(0.2,0.5,1.0,1);
-const vec4 White = vec4(1);
-const float Gloss = 11.0;
+const vec4 Color = vec4(0.7,0.4,0.1,1);
+const vec4 White = vec4(0.25,0,0,1);
+const float Gloss = 4.0;
 const float Ambient = 0.1;
-const float Freq = 7.5;
+const float Freq = 15.0;
 const float Amp = 0.01;
-const float Delta = 0.01/Freq;
+const float Delta = 0.1/Freq;
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson
@@ -95,25 +94,13 @@ float cnoise(vec3 P){
   return 2.2 * n_xyz;
 }
 
-
 vec2 blinnPhong(vec3 normal, vec3 light, float kA, float kD, float kS, float shiny)
 {
-	float NdotL = dot(normal, light);
-	float diffuse = max(0.0, NdotL);
-	/** /
-	vec3 R = reflect(-light, normal);
-	vec3 V = normalize(-e_Position);
-	specular = pow(max(0.0, dot(R,V)), shiny);
-	/**/
-	vec3 H = normalize(light - normalize(e_Position));
-	float specular = diffuse*pow(max(0.0, dot(normal, H)), shiny);
-
-
+	float diffuse = max(0.0, dot(normal, light));
+	vec3 H = normalize(light - vec3(0,0,1));
+	float specular = pow(max(0.0, dot(normal, H)), shiny);
 	return vec2(kA + kD*diffuse, kS*specular);
 }
-
-
-
 
 float perlin(vec3 pos, int octaves, float decay)
 {
@@ -126,48 +113,8 @@ float perlin(vec3 pos, int octaves, float decay)
 	return acc;
 }
 
-void drawScalar(float scalar)
-{
-	//float position = (-normalize(e_Position)).z;
-	//out_Color = vec4(0.5*(position+ vec3(1)), 1);
-	out_Color = vec4(vec3(0.5*(scalar + 1.0)), 1);
-}
-
-void drawNormalVector(vec3 vector)
-{
-	vec3 normal = normalize(vector);
-	out_Color = vec4(0.5*(normal+vec3(1)), 1);
-}
-
 void main() 
 {
-	vec3 light = Light;
-	
-	switch(Mode)
-	{
-	case 1:
-		drawNormalVector(Normal * m_Normal);
-		return;
-	case 2:
-		//drawScalar((-normalize(e_Position)).z);
-		//drawNormalVector(- vec3(e_Position.xy, 0));
-		vec3 position = - vec3(e_Position.xy, 0);
-		out_Color = vec4(0.5*(position+vec3(1,1,0)), 1);
-		return;
-	case 3:
-		drawNormalVector(light);
-		return;
-	case 4:
-		drawNormalVector(light - normalize(e_Position));
-		return;
-	case 5:
-		vec3 H = normalize(light - normalize(e_Position));
-		vec3 n = normalize(Normal * m_Normal);
-		drawScalar(dot(n, H));
-		return;
-		
-	}
-	
 	vec3 mnormal = normalize(m_Normal);
 	vec3 tangent = normalize(m_Tangent);	
 	vec3 bitangent = cross(mnormal, tangent);
@@ -177,7 +124,7 @@ void main()
 	vec3 posv = m_Position + Delta * bitangent;
 	
 	const int octaves = 2;
-	const float decay = 2.0;
+	const float decay = 1.5;
 	
 	float noise0 = Amp*perlin(Freq*pos0, octaves, decay);
 	float noiseu = Amp*perlin(Freq*posu, octaves, decay);
@@ -191,7 +138,6 @@ void main()
 	vec3 b = normalize(pos0 - posv);
 	
 	vec3 normal = normalize(Normal * cross(t, b));
-	
-	vec2 phong = blinnPhong(normal, light, Ambient, 1.0, 1.0, Gloss);
-	out_Color = phong.x * Color + phong.y * White;		
+	vec2 phong = blinnPhong(normal, Light, Ambient, 1.0, 0.5, Gloss);
+	out_Color = phong.x * Color + phong.y * White;
 }

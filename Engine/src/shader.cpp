@@ -7,7 +7,7 @@ using namespace cgj;
 
 /////////////////////////////////////////////////////////////////////// Shader
 
-Shader::Shader() :	loaded_(false),	compiled_(false)
+Shader::Shader() :	loaded_(false),	compiled_(false), filename_()
 {
 }
 
@@ -18,6 +18,7 @@ Shader::~Shader()
 
 void Shader::load(std::string filename)
 {
+	filename_ = filename;
 	auto input = std::ifstream();
 	input.exceptions(std::ifstream::failbit);
 	try {
@@ -37,16 +38,29 @@ void Shader::load(std::istream & stream)
 
 	id_ = createShader();
 
-	std::string contents((std::istreambuf_iterator<char>(stream)),
-		std::istreambuf_iterator<char>());
-
-	string_ = contents;
-	const GLchar* source_ = string_.c_str();
-
-	glShaderSource(id_, 1, &source_, 0);
-	PEEK_OPENGL_ERROR("Failed Generating Shader")
+	read(stream);	
 
 	loaded_ = true;
+}
+
+void cgj::Shader::reload()
+{
+	if (filename_.empty()) return;
+	
+	auto input = std::ifstream();
+	input.exceptions(std::ifstream::failbit);
+	try {
+		input.open(filename_);
+		read(input);
+		input.close();
+	}
+	catch (std::ifstream::failure e) {
+		std::cerr << e.what() << std::endl;
+		throw std::exception(e);
+	}
+
+	compiled_ = false;
+	compile(std::cerr);
 }
 
 void Shader::compile(std::ostream & output)
@@ -74,6 +88,18 @@ void Shader::compile(std::ostream & output)
 GLuint Shader::id()
 {
 	return id_;
+}
+
+void cgj::Shader::read(std::istream & stream)
+{
+	std::string contents((std::istreambuf_iterator<char>(stream)),
+		std::istreambuf_iterator<char>());
+
+	string_ = contents;
+	const GLchar* source_ = string_.c_str();
+
+	glShaderSource(id_, 1, &source_, 0);
+	PEEK_OPENGL_ERROR("Failed Generating Shader")
 }
 
 GLuint VertexShader::createShader()
@@ -174,6 +200,20 @@ void ShaderProgram::use()
 void cgj::ShaderProgram::stop() //good idea prof
 {
 	glUseProgram(0);
+}
+
+void cgj::ShaderProgram::reload()
+{
+	try {
+		for (auto shader : shaders_) {
+			shader->reload();
+		}
+		
+		link(std::cerr);
+	}
+	catch (std::exception e) {
+		//Just show the error
+	}
 }
 
 void ShaderProgram::deleteShaders()

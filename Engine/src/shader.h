@@ -20,6 +20,7 @@ namespace cgj {
 
 		void load(std::string filename);
 		void load(std::istream &stream);
+		void reload();
 		void compile(std::ostream &output = std::cerr);
 		GLuint id();
 
@@ -29,7 +30,9 @@ namespace cgj {
 		bool loaded_;
 		bool compiled_;
 		GLuint id_;
+		std::string filename_;
 		std::string string_;
+		void read(std::istream& stream);
 	};
 
 	class VertexShader : public Shader {
@@ -53,6 +56,7 @@ namespace cgj {
 		GLint getUniform(std::string id);
 		void use();
 		void stop();
+		void reload();
 		void deleteShaders();
 		bool empty();
 		

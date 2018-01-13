@@ -1,4 +1,5 @@
 #version 330 core
+precision highp float;
 
 //Vertex shader inputs
 in vec3 in_Position;
@@ -8,17 +9,18 @@ in vec3 in_Normal;
 //Outputs to the fragment shader
 //out vec3 ex_Position;
 //out vec3 ex_Texcoord;
-//out vec3 ex_Normal;
-out float ex_Diffuse;
-out float ex_Specular;
+out vec3 ex_Normal;
+//out float ex_Diffuse;
+//out float ex_Specular;
+
 
 //Include at least these 4 uniforms
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
-uniform mat4 Normal; //convert to eye space
+uniform mat3 Normal; //convert to eye space
 
-const vec3 Light = normalize(vec3(1.0, 1.0, 1.0));
+//const vec3 Light = normalize(vec3(1.0, 1.0, 1.0));
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson
@@ -160,11 +162,71 @@ float cnoise(vec4 P){
   return 2.2 * n_xyzw;
 }
 
+#define FREQ 2.0
+#define AMPL 0.2
+#define DELTA 0.00005
+
+const vec3 X = vec3(1,0,0);
+const vec3 Y = vec3(0,1,0);
+const vec3 Z = vec3(0,0,1);
+
+vec4 noise_pos(vec3 pos, vec3 delta)
+{
+	return FREQ*vec4(pos, 1) + delta;
+}
+
+#define CHECK 0.75
+
 void main(void)
 {
-	vec3 normal = normalize(Normal * in_Normal);
-	ex_Diffuse = max(0.0, dot(normal, Light));
-	float noise = cnoise(vec4(3.5*in_Position, 1)) / 5.0;
-	vec3 position = noise*normalize(in_Normal) + in_Position;
-	gl_Position = Projection * View * Model * vec4(position, 1.0);
+	vec3 normal = in_Normal;
+	vec3 norU;
+	vec3 norV;
+	float inv;
+	
+	
+	//normal = z
+	if (abs(dot(normal, X)) < CHECK && abs(dot(normal, Y)) < CHECK) {
+		//float inv = dot(in_Normal, Z) > 0.0 ? 1.0 : -1.0;
+		inv = in_Normal.z > 0.0 ? 1.0 : -1.0;
+		//float inv = 1.0;
+		norU = normalize(cross(inv*Y, inv*normal)); //x
+		norV = inv * normalize(cross(inv*normal, inv*X)); //y
+	} //normal = x
+	/**/
+	else if (abs(dot(normal, Y)) < CHECK && abs(dot(normal, Z)) < CHECK) {
+		//float inv = dot(in_Normal, X) > 0.0 ? 1.0 : -1.0;
+		inv = normal.x > 0.0 ? 1.0 : -1.0;
+		//float inv = 1.0;
+		norU = normalize(cross(inv*Z, inv*normal)); //y
+		norV = inv * normalize(cross(inv*normal, inv*Y)); //z
+	} //normal = y
+	else {
+		//float inv = dot(in_Normal, Y) > 0.0 ? 1.0 : -1.0;
+		inv = normal.y > 0.0 ? 1.0 : -1.0;
+		//float inv = 1.0;
+		norU = normalize(cross(inv*X, inv*normal)); //z
+		norV = inv * normalize(cross(inv*normal, inv*Z)); //x
+	}
+	/**/
+	
+	float noise = AMPL*cnoise(noise_pos(in_Position, vec3(0.0)));
+	float noiseX = AMPL*cnoise(noise_pos(in_Position, DELTA*inv*norU));
+	float noiseY = AMPL*cnoise(noise_pos(in_Position, DELTA*inv*norV));
+	
+	
+	vec3 position = in_Position;
+	vec3 position0 = position + noise*normal;
+	vec3 positionX = (position + DELTA*inv*norU) + noiseX*normal;
+	vec3 positionY = (position + DELTA*inv*norV) + noiseY*normal;
+	
+	vec3 delX = normalize(positionX - position0);
+	vec3 delY = normalize(positionY - position0);
+	normal = normalize(cross(delX, delY));
+	
+	//ex_Diffuse = max(0.0, dot(normal, Light));
+	ex_Normal = normal;
+	//ex_Normal = normalize(mat3(Model) * normal);
+	//ex_Normal = normal;
+	gl_Position = Projection * View * Model * vec4(position0, 1.0);
 }

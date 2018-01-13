@@ -3,8 +3,8 @@
 //Fragment shader inputs
 //in vec3 ex_Position;
 //in vec3 ex_Texcoord;
-//in vec3 ex_Normal;
-in float ex_Diffuse;
+in vec3 ex_Normal;
+//in float ex_Diffuse;
 
 //Fragment shader output
 out vec4 out_Color;
@@ -14,5 +14,7 @@ const float Ambient = 0.1;
 
 void main()
 {
-	out_Color = Ambient*Color + ex_Diffuse*Color;
+	//out_Color = Ambient*Color + ex_Diffuse*Color;
+	vec3 normal = (ex_Normal + vec3(1))/2.0;
+	out_Color = vec4(normal, 1);
 }

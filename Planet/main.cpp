@@ -130,6 +130,13 @@ void keyboardUp(unsigned char key, int x, int y)
 			it->second->uniform("Mode", digit);
 		}
 	}
+	else if (key == 'r' || key == 'R') {
+		//Reload Shaders
+		Storage<ShaderProgram>& storage = Storage<ShaderProgram>::instance();
+		for (auto it = storage.cbegin(); it != storage.cend(); ++it) {
+			it->second->reload();
+		}
+	}
 }
 
 //glutSpecialFunc
@@ -284,14 +291,17 @@ void setupCallbacks()
 //#define FRAG_LAND_FILE "assets/basic_shader.frag"
 //#define VERT_WATER_FILE "assets/basic_shader.vert"
 //#define FRAG_WATER_FILE "assets/basic_shader.frag"
-#define VERT_LAND_FILE "assets/blinn_phong.vert"
-#define FRAG_LAND_FILE "assets/blinn_phong.frag"
+//#define VERT_LAND_FILE "assets/blinn_phong.vert"
+//#define FRAG_LAND_FILE "assets/blinn_phong.frag"
 //#define FRAG_LAND_FILE "assets/height_shader.frag"
 //#define VERT_WATER_FILE "assets/blinn_phong.vert"
 //#define FRAG_WATER_FILE "assets/water_bp.frag"
 #define VERT_WATER_FILE "assets/water_bump.vert"
 #define FRAG_WATER_FILE "assets/water_bump.frag"
+#define VERT_LAND_FILE "assets/water_bump.vert"
+#define FRAG_LAND_FILE "assets/land_bump.frag"
 #define LAND_FILE "assets/icosphere2.obj"	
+//#define LAND_FILE "assets/icosphere.obj"
 #define WATER_FILE "assets/icosphere.obj"
 
 ShaderProgram shaderProgram;
@@ -341,7 +351,7 @@ Mesh water_mesh;
 
 void createMeshes()
 {
-	PerlinFilter perlin(1.5f, 0.19f, -0.025f, 8, 1.8);
+	PerlinFilter perlin(1.5f, 0.15f, -0.02f, 8, 1.8);
 	SphericalTangentFilter sphere;
 
 
@@ -368,7 +378,7 @@ Node water;
 
 void planetRotate(Node& munkey)
 {
-	munkey.transform().rotateY(0.1f / 60.0f);
+	//munkey.transform().rotateY(0.1f / 60.0f);
 }
 
 
@@ -383,6 +393,8 @@ void createScene()
 	water.mesh(*Storage<Mesh>::instance().get("water"));
 	water.shader(*Storage<ShaderProgram>::instance().get("water"));
 	land.addChild(&water);
+	//scene.root()->addChild(&water);
+	//land.addNodeBack(&water);
 	
 	Storage<Scene>::instance().add("example", &scene);
 }

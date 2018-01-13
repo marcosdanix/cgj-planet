@@ -8,15 +8,16 @@ out vec4 out_Color;
 
 void main(void)
 {
-	const float maxHeight = 1.165;
+	const float pi = 3.14159265359;
+	const float maxHeight = 1.155;
 	float height = (length(m_Position) - 1.0)/(maxHeight - 1.0); //the distance from the center
 	//The sphere has one unit radius, so it has to subract one from the length and maximum height
 	
-	float latitude = abs(dot(normalize(m_Position), vec3(0,1,0))); //Higher the latitude, higher the value
+	float latitude = 1.0 - acos(abs(normalize(m_Position).y)) / (0.5*pi); //Higher the latitude, higher the value
 	//By doing the dot product with Y, which makes areas in the poles 1 and in the equator 0
 	
 	
-	/**/
+	/** /
 	//paint the mountains white
 	if (height > 0.4) out_Color = vec4(vec3(height), 1);
 	
@@ -29,9 +30,9 @@ void main(void)
 	out_Color = vec4(vec3(height), 1);
 	/**/
 	
-	/** /
+	/**/
 	//simple latitude map
-	out_Color = vec4(vec3(latitude), 1);
+	out_Color = vec4(vec3(latitude), 1);	
 	/**/
 	
 	/** /
