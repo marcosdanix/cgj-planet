@@ -302,7 +302,10 @@ void setupCallbacks()
 #define FRAG_LAND_FILE "assets/land_bump.frag"
 #define VERT_CUBEMAP "assets/cubemap.vert"
 #define FRAG_CUBEMAP "assets/cubemap.frag"
+#define VERT_MOON_FILE "assets/water_bump.vert"
+#define FRAG_MOON_FILE "assets/moon_bump.frag"
 #define LAND_FILE "assets/icosphere2.obj"	
+#define MOON_FILE "assets/icosphere.obj"	
 //#define LAND_FILE "assets/icosphere.obj"
 #define WATER_FILE "assets/icosphere.obj"
 #define CUBEMAP_FILE "assets/cubemap.obj"
@@ -318,6 +321,10 @@ FragmentShader waterFragmentShader;
 ShaderProgram cubemapProgram;
 VertexShader cubemapVert;
 FragmentShader cubemapFrag;
+
+ShaderProgram moonShaderProgram;
+VertexShader moonVertexShader;
+FragmentShader moonFragmentShader;
 
 void createShaderProgram()
 {
@@ -364,25 +371,45 @@ void createShaderProgram()
 	//Add to the storage so it can be accessed by the rest of the engine
 	//It's not necessary, but it's being used to test this feature
 	Storage<ShaderProgram>::instance().add("cubemap", &cubemapProgram);
+
+	moonVertexShader.load(VERT_MOON_FILE);
+	moonFragmentShader.load(FRAG_MOON_FILE);
+
+	moonShaderProgram.create()
+		.attach(&moonVertexShader) //if it's not compiled, it compiles the shader
+		.attach(&moonFragmentShader)
+		.bindAttribute(VERTICES, "in_Position")
+		.bindAttribute(NORMALS, "in_Normal")
+		.bindAttribute(TANGENT, "in_Tangent")
+		.link();
+
+	//Add to the storage so it can be accessed by the rest of the engine
+	//It's not necessary, but it's being used to test this feature
+	Storage<ShaderProgram>::instance().add("moon", &moonShaderProgram);
 }
 
 Mesh land_mesh;
 Mesh water_mesh;
 Mesh cubemap_mesh;
+Mesh moon_mesh;
 
 void createMeshes()
 {
 	PerlinFilter perlin(1.5f, 0.15f, -0.02f, 8, 1.8);
+	PerlinFilter perlinMoon(1.5f, 0.09f, -0.02f, 8, 1.8);
 	SphericalTangentFilter sphere;
 
 
 	land_mesh.load(LAND_FILE, perlin);
 	water_mesh.load(WATER_FILE, sphere);
 	cubemap_mesh.load(CUBEMAP_FILE);
+	moon_mesh.load(MOON_FILE, perlinMoon);
 
 	Storage<Mesh>::instance().add("land",  &land_mesh);
 	Storage<Mesh>::instance().add("water", &water_mesh);
 	Storage<Mesh>::instance().add("cubemap", &cubemap_mesh);
+	Storage<Mesh>::instance().add("moon", &moon_mesh);
+
 }
 
 
@@ -390,7 +417,7 @@ void createMeshes()
 void setupCamera()
 {
 	aspect = float(WinX) / float(WinY);
-	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, -4.0f, 4.0f);
+	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, 500.0f, -500.0f);
 	orbit = OrbitControl(2.0f, 0.5f, 0.0f);
 	camera = Camera(&orbit, projection);
 }
@@ -399,10 +426,17 @@ Scene scene;
 Node land;
 Node water;
 Node cubemap;
+Node moon;
+Node moonAnchor;
 
 void planetRotate(Node& munkey)
 {
 	munkey.transform().rotateY(0.1f / 60.0f);
+}
+
+void moonRotate(Node& munkey) 
+{
+	munkey.transform().rotateY(0.1f / 40.0f);
 }
 
 
@@ -414,7 +448,7 @@ void createScene()
 	land.updateFunc(planetRotate);
 	scene.root()->addChild(&cubemap);
 	scene.root()->addChild(&land);
-
+	
 	water.mesh(*Storage<Mesh>::instance().get("water"));
 	water.shader(*Storage<ShaderProgram>::instance().get("water"));
 	land.addChild(&water);
@@ -424,7 +458,17 @@ void createScene()
 	cubemap.mesh(*Storage<Mesh>::instance().get("cubemap"));
 	cubemap.shader(*Storage<ShaderProgram>::instance().get("cubemap"));
 	
-	
+	moon.mesh(*Storage<Mesh>::instance().get("moon"));
+	moon.shader(*Storage<ShaderProgram>::instance().get("moon"));
+	moon.transform().translation(vec3(0.0f, 0.0f, 5.0f));
+	moon.transform().scale(vec3(0.5f));
+
+	land.addChild(&moon);
+
+	//moonAnchor.addChild(&moon);
+	//moonAnchor.updateFunc(moonRotate);
+	//scene.root()->addChild(&moonAnchor);
+
 	Storage<Scene>::instance().add("example", &scene);
 }
 

@@ -11,7 +11,7 @@ uniform mat3 Normal;
 
 void main(void)
 {
-	vec3 pos =  mat3(View) * mat3(2.0) * in_Position;
+	vec3 pos =  -mat3(View) * mat3(2.0) * in_Position;
 	//vec3 pos = normalize(in_Position);
 	ex_Position = in_Position;
 	gl_Position = vec4(pos.xy, 1, 1);

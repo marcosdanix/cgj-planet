@@ -1,8 +1,23 @@
 #version 330 core
 
-in vec3 ex_Position;
+in vec3 m_Position;
+in vec3 e_Position;
+in vec3 m_Normal;
+in vec3 m_Tangent;
+in vec3 Light;
 
 out vec4 out_Color;
+
+uniform mat3 Normal;
+
+//const vec3 Light = normalize(vec3(1, 1, 1));
+const vec4 Color = vec4(0.6,0.6,0.6,1);
+const vec4 White = vec4(0.25,0,0,1);
+const float Gloss = 4.0;
+const float Ambient = 0.1;
+const float Freq = 15.0;
+const float Amp = 0.008;
+const float Delta = 0.1/Freq;
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson
@@ -79,6 +94,14 @@ float cnoise(vec3 P){
   return 2.2 * n_xyz;
 }
 
+vec2 blinnPhong(vec3 normal, vec3 light, float kA, float kD, float kS, float shiny)
+{
+	float diffuse = max(0.0, dot(normal, light));
+	vec3 H = normalize(light - vec3(0,0,1));
+	float specular = pow(max(0.0, dot(normal, H)), shiny);
+	return vec2(kA + kD*diffuse, kS*specular);
+}
+
 float perlin(vec3 pos, int octaves, float decay)
 {
 	float acc = 0.0;
@@ -90,20 +113,31 @@ float perlin(vec3 pos, int octaves, float decay)
 	return acc;
 }
 
-const vec3 ADD = vec3(7,13,19);
-const vec3 ADD2 = vec3(23, -7, 113);
-
-void main(void) {
-	vec3 pos = normalize(ex_Position);
-	//out_Color.rgb = 0.5 + 0.5*pos;
-	//float noise = 1.0 - (1.0 / (10.0*abs(perlin(32.0*pos, 4, 2.0))));
-	float noise = perlin(64.0*pos, 4, 1.5);
-	float yy = pos.x*(1.0 - sqrt(abs(pos.y)));
-	noise = noise > (0.4 - 0.1*yy) ? noise : 0.0;
-	float noise22 = 0.5 + 0.5 * perlin(10.0*pos+ADD, 4, 2.0);
-	float noise33 = 0.5 + 0.5 * perlin(10.0*pos+ADD2, 4, 2.0);
+void main() 
+{
+	vec3 mnormal = normalize(m_Normal);
+	vec3 tangent = normalize(m_Tangent);	
+	vec3 bitangent = cross(mnormal, tangent);
 	
-	out_Color.rgb = vec3(noise+yy*0.5*(noise22-0.25*noise33));
+	vec3 pos0 = m_Position;
+	vec3 posu = m_Position + Delta * tangent;
+	vec3 posv = m_Position + Delta * bitangent;
 	
+	const int octaves = 2;
+	const float decay = 1.5;
+	
+	float noise0 = Amp*perlin(Freq*pos0, octaves, decay);
+	float noiseu = Amp*perlin(Freq*posu, octaves, decay);
+	float noisev = Amp*perlin(Freq*posv, octaves, decay);
+	
+	pos0 += mnormal*noise0;
+	posu += mnormal*noiseu;
+	posv += mnormal*noisev;
+	
+	vec3 t = normalize(pos0 - posu);
+	vec3 b = normalize(pos0 - posv);
+	
+	vec3 normal = normalize(Normal * cross(t, b));
+	vec2 phong = blinnPhong(normal, Light, Ambient, 1.0, 0.5, Gloss);
+	out_Color = phong.x * Color + phong.y * White;
 }
-
