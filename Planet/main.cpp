@@ -300,9 +300,12 @@ void setupCallbacks()
 #define FRAG_WATER_FILE "assets/water_bump.frag"
 #define VERT_LAND_FILE "assets/water_bump.vert"
 #define FRAG_LAND_FILE "assets/land_bump.frag"
+#define VERT_CUBEMAP "assets/cubemap.vert"
+#define FRAG_CUBEMAP "assets/cubemap.frag"
 #define LAND_FILE "assets/icosphere2.obj"	
 //#define LAND_FILE "assets/icosphere.obj"
 #define WATER_FILE "assets/icosphere.obj"
+#define CUBEMAP_FILE "assets/cubemap.obj"
 
 ShaderProgram shaderProgram;
 VertexShader vertexShader;
@@ -311,6 +314,10 @@ FragmentShader fragmentShader;
 ShaderProgram waterShaderProgram;
 VertexShader waterVertexShader;
 FragmentShader waterFragmentShader;
+
+ShaderProgram cubemapProgram;
+VertexShader cubemapVert;
+FragmentShader cubemapFrag;
 
 void createShaderProgram()
 {
@@ -344,10 +351,24 @@ void createShaderProgram()
 	//Add to the storage so it can be accessed by the rest of the engine
 	//It's not necessary, but it's being used to test this feature
 	Storage<ShaderProgram>::instance().add("water", &waterShaderProgram);
+
+	cubemapVert.load(VERT_CUBEMAP);
+	cubemapFrag.load(FRAG_CUBEMAP);
+
+	cubemapProgram.create()
+		.attach(&cubemapVert) //if it's not compiled, it compiles the shader
+		.attach(&cubemapFrag)
+		.bindAttribute(VERTICES, "in_Position")
+		.link();
+
+	//Add to the storage so it can be accessed by the rest of the engine
+	//It's not necessary, but it's being used to test this feature
+	Storage<ShaderProgram>::instance().add("cubemap", &waterShaderProgram);
 }
 
 Mesh land_mesh;
 Mesh water_mesh;
+Mesh cubemap_mesh;
 
 void createMeshes()
 {
@@ -357,9 +378,11 @@ void createMeshes()
 
 	land_mesh.load(LAND_FILE, perlin);
 	water_mesh.load(WATER_FILE, sphere);
+	cubemap_mesh.load(CUBEMAP_FILE);
 
 	Storage<Mesh>::instance().add("land",  &land_mesh);
 	Storage<Mesh>::instance().add("water", &water_mesh);
+	Storage<Mesh>::instance().add("cubemap", &cubemap_mesh);
 }
 
 
@@ -375,10 +398,11 @@ void setupCamera()
 Scene scene;
 Node land;
 Node water;
+Node cubemap;
 
 void planetRotate(Node& munkey)
 {
-	//munkey.transform().rotateY(0.1f / 60.0f);
+	munkey.transform().rotateY(0.1f / 60.0f);
 }
 
 
@@ -388,6 +412,7 @@ void createScene()
 	land.mesh(*Storage<Mesh>::instance().get("land"));
 	land.shader(*Storage<ShaderProgram>::instance().get("land"));
 	land.updateFunc(planetRotate);
+	scene.root()->addChild(&cubemap);
 	scene.root()->addChild(&land);
 
 	water.mesh(*Storage<Mesh>::instance().get("water"));
@@ -395,6 +420,10 @@ void createScene()
 	land.addChild(&water);
 	//scene.root()->addChild(&water);
 	//land.addNodeBack(&water);
+
+	cubemap.mesh(*Storage<Mesh>::instance().get("cubemap"));
+	water.shader(*Storage<ShaderProgram>::instance().get("cubemap"));
+	
 	
 	Storage<Scene>::instance().add("example", &scene);
 }
