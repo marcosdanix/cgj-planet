@@ -9,6 +9,7 @@ uniform mat3 Normal;
 void main(void)
 {
 	vec3 pos =  Normal * in_Position;
+	//vec3 pos = normalize(in_Position);
 	ex_Position = pos;
-	gl_Position = vec4(pos.xy, -1, 1);
+	gl_Position = vec4(pos.xy, 0.999, 1);
 }

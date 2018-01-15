@@ -363,7 +363,7 @@ void createShaderProgram()
 
 	//Add to the storage so it can be accessed by the rest of the engine
 	//It's not necessary, but it's being used to test this feature
-	Storage<ShaderProgram>::instance().add("cubemap", &waterShaderProgram);
+	Storage<ShaderProgram>::instance().add("cubemap", &cubemapProgram);
 }
 
 Mesh land_mesh;
@@ -422,7 +422,7 @@ void createScene()
 	//land.addNodeBack(&water);
 
 	cubemap.mesh(*Storage<Mesh>::instance().get("cubemap"));
-	water.shader(*Storage<ShaderProgram>::instance().get("cubemap"));
+	cubemap.shader(*Storage<ShaderProgram>::instance().get("cubemap"));
 	
 	
 	Storage<Scene>::instance().add("example", &scene);
