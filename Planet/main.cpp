@@ -22,6 +22,7 @@ int WindowHandle = 0;
 unsigned int FrameCount = 0;
 float zoom = 1.5;
 float aspect;
+float time = 0.0f;
 
 const float zNear = -100.0f;
 const float zFar = 100.0f;
@@ -89,9 +90,20 @@ void timerRefreshWindow()
 	glutTimerFunc(1000, timer, 0);
 }
 
+void updateShaderTimeUniform() {
+	Storage<ShaderProgram>& storage = Storage<ShaderProgram>::instance();
+	for (auto it = storage.cbegin(); it != storage.cend(); ++it) {
+		it->second->use();
+		it->second->uniform("Time", time);
+		it->second->stop();
+	}
+}
+
 void update()
 {
 	Storage<Scene>::instance().get("example")->update();
+	updateShaderTimeUniform();
+	time += 0.016f;
 }
 
 void timerFPS()

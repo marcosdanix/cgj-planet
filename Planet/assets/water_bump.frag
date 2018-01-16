@@ -10,6 +10,7 @@ out vec4 out_Color;
 
 uniform mat3 Normal;
 uniform int Mode;
+uniform float Time;
 
 //const vec3 Light = normalize(vec3(1, 1, 1));
 const vec4 Color = vec4(0.2,0.5,1.0,1);
@@ -178,10 +179,13 @@ void main()
 	
 	const int octaves = 2;
 	const float decay = 2.0;
+	const float radius = Freq*1.5;
+	const float speed = 0.055;
+	vec3 add = radius * vec3(0.0, cos(speed*Time), sin(speed*Time));
 	
-	float noise0 = Amp*perlin(Freq*pos0, octaves, decay);
-	float noiseu = Amp*perlin(Freq*posu, octaves, decay);
-	float noisev = Amp*perlin(Freq*posv, octaves, decay);
+	float noise0 = Amp*perlin(Freq*pos0 + add, octaves, decay);
+	float noiseu = Amp*perlin(Freq*posu + add, octaves, decay);
+	float noisev = Amp*perlin(Freq*posv + add, octaves, decay);
 	
 	pos0 += mnormal*noise0;
 	posu += mnormal*noiseu;
@@ -193,5 +197,5 @@ void main()
 	vec3 normal = normalize(Normal * cross(t, b));
 	
 	vec2 phong = blinnPhong(normal, light, Ambient, 1.0, 1.0, Gloss);
-	out_Color = phong.x * Color + phong.y * White;		
+	out_Color = phong.x * Color + phong.y * White;
 }

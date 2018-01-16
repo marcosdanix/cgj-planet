@@ -12,12 +12,12 @@ uniform mat3 Normal;
 
 //const vec3 Light = normalize(vec3(1, 1, 1));
 const vec4 Color = vec4(0.7,0.4,0.1,1);
-const vec4 White = vec4(0.25,0,0,1);
-const float Gloss = 4.0;
+const vec4 White = vec4(1,0.5,0,1);
+const float Gloss = 8.0;
 const float Ambient = 0.1;
-const float Freq = 15.0;
+const float Freq = 12.0;
 const float Amp = 0.01;
-const float Delta = 0.1/Freq;
+const float Delta = 0.01/Freq;
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson
@@ -96,9 +96,15 @@ float cnoise(vec3 P){
 
 vec2 blinnPhong(vec3 normal, vec3 light, float kA, float kD, float kS, float shiny)
 {
-	float diffuse = max(0.0, dot(normal, light));
-	vec3 H = normalize(light - vec3(0,0,1));
-	float specular = pow(max(0.0, dot(normal, H)), shiny);
+	float NdotL = dot(normal, light);
+	float diffuse = max(0.0, NdotL);
+	/** /
+	vec3 R = reflect(-light, normal);
+	vec3 V = normalize(-e_Position);
+	specular = pow(max(0.0, dot(R,V)), shiny);
+	/**/
+	vec3 H = normalize(light - normalize(e_Position));
+	float specular = diffuse*pow(max(0.0, dot(normal, H)), shiny);
 	return vec2(kA + kD*diffuse, kS*specular);
 }
 
@@ -123,8 +129,8 @@ void main()
 	vec3 posu = m_Position + Delta * tangent;
 	vec3 posv = m_Position + Delta * bitangent;
 	
-	const int octaves = 2;
-	const float decay = 1.5;
+	const int octaves = 4;
+	const float decay = 2.0;
 	
 	float noise0 = Amp*perlin(Freq*pos0, octaves, decay);
 	float noiseu = Amp*perlin(Freq*posu, octaves, decay);
@@ -138,6 +144,6 @@ void main()
 	vec3 b = normalize(pos0 - posv);
 	
 	vec3 normal = normalize(Normal * cross(t, b));
-	vec2 phong = blinnPhong(normal, Light, Ambient, 1.0, 0.5, Gloss);
+	vec2 phong = blinnPhong(normal, Light, Ambient, 1.0, 0.1, Gloss);
 	out_Color = phong.x * Color + phong.y * White;
 }
