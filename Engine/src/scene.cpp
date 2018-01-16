@@ -226,7 +226,7 @@ void cgj::NodeIterator::next()
 			node_ = node_->parent_;
 			if (node_ == nullptr) return; //this ends the iteration in isEnd()
 			next = node_->next_;
-		} while (next != nullptr || next != start_.top());
+		} while (next == start_.top());
 
 		node_ = next;
 		stack_.push(node_->transform_);

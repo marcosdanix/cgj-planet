@@ -23,6 +23,9 @@ unsigned int FrameCount = 0;
 float zoom = 1.5;
 float aspect;
 
+const float zNear = -100.0f;
+const float zFar = 100.0f;
+
 //STUFF
 
 Camera camera;
@@ -57,7 +60,7 @@ void idle()
 
 void recalculateProjection()
 {	
-	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, -4.0f, 4.0f);
+	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, zNear, zFar);
 	//A bit of a mouthful
 	Storage<Scene>::instance().get("example")->camera().projection(projection);
 }
@@ -417,8 +420,8 @@ void createMeshes()
 void setupCamera()
 {
 	aspect = float(WinX) / float(WinY);
-	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, 500.0f, -500.0f);
-	orbit = OrbitControl(2.0f, 0.5f, 0.0f);
+	mat4 projection = glm::ortho(-aspect*zoom, aspect*zoom, -zoom, zoom, zNear, zFar);
+	orbit = OrbitControl(10.0f, 0.5f, 0.0f);
 	camera = Camera(&orbit, projection);
 }
 
@@ -429,45 +432,50 @@ Node cubemap;
 Node moon;
 Node moonAnchor;
 
-void planetRotate(Node& munkey)
+void planetRotate(Node& node)
 {
-	munkey.transform().rotateY(0.1f / 60.0f);
+	//node.transform().rotateY(0.1f / 60.0f);
 }
 
-void moonRotate(Node& munkey) 
+void moonOrbit(Node& node) {
+	//node.transform().rotateY(0.0f / 60.0f);
+}
+
+void moonRotate(Node& node) 
 {
-	munkey.transform().rotateY(0.1f / 40.0f);
+	node.transform().rotateY(0.2f / 60.0f);
 }
 
 
 void createScene()
 {
 	scene = Scene(camera);
+	scene.root()->addChild(&cubemap);
+	scene.root()->addChild(&land);
+	scene.root()->addChild(&moonAnchor);
+
 	land.mesh(*Storage<Mesh>::instance().get("land"));
 	land.shader(*Storage<ShaderProgram>::instance().get("land"));
 	land.updateFunc(planetRotate);
-	scene.root()->addChild(&cubemap);
-	scene.root()->addChild(&land);
+	land.addChild(&water);
 	
 	water.mesh(*Storage<Mesh>::instance().get("water"));
 	water.shader(*Storage<ShaderProgram>::instance().get("water"));
-	land.addChild(&water);
-	//scene.root()->addChild(&water);
-	//land.addNodeBack(&water);
 
 	cubemap.mesh(*Storage<Mesh>::instance().get("cubemap"));
 	cubemap.shader(*Storage<ShaderProgram>::instance().get("cubemap"));
-	
+
+	moonAnchor.addChild(&moon);
+	moonAnchor.updateFunc(moonOrbit);
+
 	moon.mesh(*Storage<Mesh>::instance().get("moon"));
 	moon.shader(*Storage<ShaderProgram>::instance().get("moon"));
+	moon.updateFunc(moonRotate);
 	moon.transform().translation(vec3(0.0f, 0.0f, 5.0f));
 	moon.transform().scale(vec3(0.5f));
 
-	land.addChild(&moon);
 
-	//moonAnchor.addChild(&moon);
-	//moonAnchor.updateFunc(moonRotate);
-	//scene.root()->addChild(&moonAnchor);
+
 
 	Storage<Scene>::instance().add("example", &scene);
 }
