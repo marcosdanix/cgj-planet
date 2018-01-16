@@ -138,7 +138,7 @@ void cgj::Node::update()
 
 	while (!it.isEnd()) {
 		Node* node = it.get();
-		if (node->update_) node->update_(*this);
+		if (node->update_) node->update_(*node);
 		it.next();
 	}
 }

@@ -434,11 +434,11 @@ Node moonAnchor;
 
 void planetRotate(Node& node)
 {
-	//node.transform().rotateY(0.1f / 60.0f);
+	node.transform().rotateY(0.1f / 60.0f);
 }
 
 void moonOrbit(Node& node) {
-	//node.transform().rotateY(0.0f / 60.0f);
+	node.transform().rotateY(0.05f / 60.0f);
 }
 
 void moonRotate(Node& node) 
