@@ -90,20 +90,24 @@ float perlin(vec3 pos, int octaves, float decay)
 	return acc;
 }
 
-const vec3 ADD = vec3(7,13,19);
-const vec3 ADD2 = vec3(23, -7, 113);
+const vec3 Light = vec3(1,0,0);
+const float radius = 0.9995;
+const vec3 Yellow = vec3(1.0, 0.9, 0.65);
 
 void main(void) {
 	vec3 pos = normalize(ex_Position);
-	//out_Color.rgb = 0.5 + 0.5*pos;
-	//float noise = 1.0 - (1.0 / (10.0*abs(perlin(32.0*pos, 4, 2.0))));
-	float noise = perlin(64.0*pos, 4, 1.5);
-	float yy = pos.x*(1.0 - sqrt(abs(pos.y)));
-	noise = noise > (0.4 - 0.1*yy) ? noise : 0.0;
-	float noise22 = 0.5 + 0.5 * perlin(10.0*pos+ADD, 4, 2.0);
-	float noise33 = 0.5 + 0.5 * perlin(10.0*pos+ADD2, 4, 2.0);
+	float noise = perlin(256.0*pos, 2, 1.5);
+	float ldotp = dot(Light, pos);
+	float sun;
+	if (ldotp > radius) {
+		sun = 1.0;
+		noise = 0.0;
+	}
+	else sun = dot(Light,pos) > 0 ? pow(dot(Light, pos), 333.0) : 0.0;
+	//float sun = 0.0;
 	
-	out_Color.rgb = vec3(noise+yy*0.5*(noise22-0.25*noise33));
+	out_Color.rgb = (noise > 0.5 ? vec3(noise) : vec3(0)) + sun * Yellow;
+	//out_Color.rgb = vec3(noise);
 	
 }
 

@@ -14,7 +14,8 @@ uniform float Time;
 
 //const vec3 Light = normalize(vec3(1, 1, 1));
 const vec4 Color = vec4(0.2,0.5,1.0,1);
-const vec4 White = vec4(1);
+//const vec4 White = vec4(1);
+const vec4 White = vec3(1.0, 0.9, 0.65)
 const float Gloss = 11.0;
 const float Ambient = 0.1;
 const float Freq = 7.5;
