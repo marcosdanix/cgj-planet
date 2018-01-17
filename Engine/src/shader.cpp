@@ -284,3 +284,10 @@ ShaderProgram & cgj::ShaderProgram::uniform(std::string id, mat4 item)
 	if (uniformId != -1) glUniformMatrix4fv(uniformId, 1, GL_FALSE, value_ptr(item));
 	return *this;
 }
+
+ShaderProgram & cgj::ShaderProgram::uniform(std::string id, Texture & texture)
+{
+	GLint uniformId = getUniform(id);
+	if (uniformId != -1) glUniform1i(uniformId, texture.id());
+	return *this;
+}

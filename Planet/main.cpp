@@ -316,7 +316,8 @@ void setupCallbacks()
 #define VERT_LAND_FILE "assets/water_bump.vert"
 #define FRAG_LAND_FILE "assets/land_bump.frag"
 #define VERT_CUBEMAP "assets/cubemap.vert"
-#define FRAG_CUBEMAP "assets/cubemap.frag"
+//#define FRAG_CUBEMAP "assets/cubemap.frag"
+#define FRAG_CUBEMAP "assets/texcoord.frag"
 #define VERT_MOON_FILE "assets/water_bump.vert"
 #define FRAG_MOON_FILE "assets/moon_bump.frag"
 #define LAND_FILE "assets/icosphere2.obj"	
@@ -427,6 +428,14 @@ void createMeshes()
 
 }
 
+TextureCubemap cubemap_texture;
+
+void createTextures()
+{
+	StarmapGenerator gen;
+	cubemap_texture.create(gen.generate(1024), 1024, 1024, 10);
+	Storage<Texture>::instance().add("cubemap", &cubemap_texture);
+}
 
 
 void setupCamera()
@@ -476,6 +485,9 @@ void createScene()
 
 	cubemap.mesh(*Storage<Mesh>::instance().get("cubemap"));
 	cubemap.shader(*Storage<ShaderProgram>::instance().get("cubemap"));
+	cubemap.beforeDraw([]() {glFrontFace(GL_CW); });
+	cubemap.afterDraw([]() {glFrontFace(GL_CCW); });
+	cubemap.texture(Storage<Texture>::instance().get("cubemap"));
 
 	moonAnchor.addChild(&moon);
 	moonAnchor.updateFunc(moonOrbit);
@@ -500,6 +512,7 @@ void init(int argc, char* argv[])
 	setupOpenGL();
 	createShaderProgram();
 	createMeshes();
+	createTextures();
 	setupCamera();
 	createScene();	
 	setupCallbacks();

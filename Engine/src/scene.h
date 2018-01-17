@@ -16,6 +16,7 @@ namespace cgj {
 	const std::string ModelAttributeName = "Model";
 	const std::string ViewAttributeName = "View";
 	const std::string ProjectionAttributeName = "Projection";
+	const std::string TextureAttributeName = "Texture";
 	//Normal matrix is in eye space (View * Model)
 	const std::string NormalAttributeName = "Normal";
 	
@@ -28,6 +29,7 @@ namespace cgj {
 	public:
 		Node();
 		Node(Transform& transform);
+		~Node() { delete texture_; }
 		
 		//if this Node has a child, does addNodeBack to that child
 		Node& addChild(Node* child);
@@ -48,6 +50,7 @@ namespace cgj {
 		Node& transform(Transform& t);
 		Node& mesh(Mesh& mesh);
 		Node& shader(ShaderProgram& shader);
+		Node& texture(Texture* texture);
 		Node& beforeDraw(std::function<void()> before);
 		Node& afterDraw(std::function<void()> after);
 		Node& updateFunc(std::function<void(Node&)> update);
@@ -63,6 +66,7 @@ namespace cgj {
 		Transform transform_;
 		Mesh mesh_;
 		ShaderProgram shader_;
+		Texture* texture_;
 		//Is this game engine-y?
 		//They are just function pointers... right?
 		std::function<void()> before_;

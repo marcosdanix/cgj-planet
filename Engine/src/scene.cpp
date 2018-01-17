@@ -40,7 +40,8 @@ cgj::Node::Node():
 	next_(this),
 	prev_(this),
 	parent_(nullptr),
-	child_(nullptr)
+	child_(nullptr),
+	texture_(nullptr)
 {
 }
 
@@ -49,6 +50,7 @@ cgj::Node::Node(Transform & transform):
 	prev_(this),
 	parent_(nullptr),
 	child_(nullptr),
+	texture_(nullptr),
 	transform_(transform)
 {
 }
@@ -114,12 +116,15 @@ void cgj::Node::draw(Camera& camera)
 				//uniform attributes
 			if (node->before_) node->before_();
 
+
 			mat3 normal = mat3(transpose(it.inverse() * camera.inverseView()));
 			node->shader_
 				.uniform(ModelAttributeName, it.matrix())
 				.uniform(ViewAttributeName, camera.view())
-				.uniform(ProjectionAttributeName, camera.projection())				
+				.uniform(ProjectionAttributeName, camera.projection())
 				.uniform(NormalAttributeName, normal);
+
+			if (texture_ != nullptr) node->shader_.uniform(TextureAttributeName, *texture_);
 			
 			node->mesh_.draw();
 
@@ -163,6 +168,12 @@ Node & cgj::Node::mesh(Mesh & mesh)
 Node & cgj::Node::shader(ShaderProgram & shader)
 {
 	shader_ = shader;
+	return *this;
+}
+
+Node & cgj::Node::texture(Texture * texture)
+{
+	texture_ = texture;
 	return *this;
 }
 

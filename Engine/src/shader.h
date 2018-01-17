@@ -5,6 +5,7 @@
 #include <map>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include "texture.h"
 
 
 
@@ -70,6 +71,7 @@ namespace cgj {
 		ShaderProgram& uniform(std::string id, mat2 item);
 		ShaderProgram& uniform(std::string id, mat3 item);
 		ShaderProgram& uniform(std::string id, mat4 item);
+		ShaderProgram& uniform(std::string id, Texture& texture);
 
 
 	private:

@@ -11,3 +11,4 @@
 #include "src/storage.h"
 #include "src/transform.h"
 #include "src/error.h"
+#include "src/texture.h"
