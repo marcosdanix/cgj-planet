@@ -152,15 +152,36 @@ void main()
 
 	vec3 normal = normalize(Normal * cross(t, b));
 	vec2 phong = blinnPhong(normal, Light, Ambient, 1.0, 0.1, Gloss);
+  vec4 aux_Color;
 
-  if (height > 0.65)
-    out_Color = phong.x * vec4(vec3(height), 1) + phong.y * White;
-  else if (height > 0.5 && height < 0.65)
-    out_Color = phong.x * mix(Color, vec4(vec3(height), 1), (height - 0.5)/0.15) + phong.y * White;
-  else if (height > 0.025 && height < 0.075*(1.0-latitude))
-    out_Color = phong.x * mix(BeachColor, Color, (height - 0.025)/0.05) + phong.y * White;
-  else if (height < 0.025)
-    out_Color = phong.x * BeachColor + phong.y * White;
-  else 
-    out_Color = phong.x * Color + phong.y * White;
+  if (latitude >= 0.9)
+    out_Color = phong.x * vec4(2) + phong.y * White;
+
+  else if (latitude >= 0.7 && latitude < 0.9) {
+    if (height > 0.65)
+      aux_Color = phong.x * vec4(vec3(height), 1) + phong.y * White;
+    else if (height > 0.5 && height < 0.65)
+      aux_Color = phong.x * mix(Color, vec4(vec3(height), 1), (height - 0.5)/0.15) + phong.y * White;
+    else if (height > 0.025 && height < 0.075*(1.0-latitude))
+      aux_Color = phong.x * mix(BeachColor, Color, (height - 0.025)/0.05) + phong.y * White;
+    else if (height < 0.025)
+      aux_Color = phong.x * BeachColor + phong.y * White;
+    else 
+      aux_Color = phong.x * Color + phong.y * White;
+
+    out_Color = phong.x * mix(aux_Color, vec4(2), (latitude - 0.7)/0.2) + phong.y * White;
+  }
+
+  else {
+    if (height > 0.65)
+      out_Color = phong.x * vec4(vec3(height), 1) + phong.y * White;
+    else if (height > 0.5 && height < 0.65)
+      out_Color = phong.x * mix(Color, vec4(vec3(height), 1), (height - 0.5)/0.15) + phong.y * White;
+    else if (height > 0.025 && height < 0.075*(1.0-latitude))
+      out_Color = phong.x * mix(BeachColor, Color, (height - 0.025)/0.05) + phong.y * White;
+    else if (height < 0.025)
+      out_Color = phong.x * BeachColor + phong.y * White;
+    else 
+      out_Color = phong.x * Color + phong.y * White;
+  }
 }
