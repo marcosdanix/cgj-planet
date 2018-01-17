@@ -9,12 +9,12 @@ in vec3 Light;
 out vec4 out_Color;
 
 uniform mat3 Normal;
-uniform int Mode;
+//uniform int Mode;
 uniform float Time;
 
 //const vec3 Light = normalize(vec3(1, 1, 1));
 const vec4 Color = vec4(0.2,0.5,1.0,1);
-const vec4 White = vec4(1);
+const vec4 White = vec4(1.0, 0.9, 0.65, 1);
 const float Gloss = 11.0;
 const float Ambient = 0.1;
 const float Freq = 7.5;
@@ -101,15 +101,9 @@ vec2 blinnPhong(vec3 normal, vec3 light, float kA, float kD, float kS, float shi
 {
 	float NdotL = dot(normal, light);
 	float diffuse = max(0.0, NdotL);
-	/** /
-	vec3 R = reflect(-light, normal);
-	vec3 V = normalize(-e_Position);
-	specular = pow(max(0.0, dot(R,V)), shiny);
-	/**/
 	vec3 H = normalize(light - normalize(e_Position));
+	//float specular = NdotL > 0.0 ? pow(max(0.0, dot(normal, H)), shiny) : 0.0;
 	float specular = diffuse*pow(max(0.0, dot(normal, H)), shiny);
-
-
 	return vec2(kA + kD*diffuse, kS*specular);
 }
 
@@ -143,7 +137,7 @@ void drawNormalVector(vec3 vector)
 void main() 
 {
 	vec3 light = Light;
-	
+	/*
 	switch(Mode)
 	{
 	case 1:
@@ -167,7 +161,7 @@ void main()
 		drawScalar(dot(n, H));
 		return;
 		
-	}
+	}*/
 	
 	vec3 mnormal = normalize(m_Normal);
 	vec3 tangent = normalize(m_Tangent);	

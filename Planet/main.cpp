@@ -3,6 +3,7 @@
 #include <string>
 #include "GL/glew.h"
 #include "GL/freeglut.h"
+#include "IL/il.h"
 #include "../Engine/Engine.h"
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -152,6 +153,22 @@ void keyboardUp(unsigned char key, int x, int y)
 			it->second->reload();
 		}
 	}
+	else if (key == 's' || key == 'S') {
+		GLubyte *pixels = new GLubyte[3 * WinX * WinY];
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadBuffer(GL_FRONT);
+		glReadPixels(0, 0, WinX, WinY, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+		ILuint image;
+		ilGenImages(1, &image);
+		ilBindImage(image);
+
+		ilSetPixels(0, 0, 0, WinX, WinY, 1, IL_RGB, IL_UNSIGNED_BYTE, pixels);
+		ilSave(IL_BMP, "screenshot.bmp");
+		
+		ilDeleteImage(image);
+		delete[] pixels;
+	}
 }
 
 //glutSpecialFunc
@@ -281,6 +298,10 @@ void setupOpenGL()
 	glFrontFace(GL_CCW);
 }
 
+void setupDevIL() {
+	ilInit();
+}
+
 void setupCallbacks()
 {
 	glutCloseFunc(cleanup);
@@ -316,8 +337,8 @@ void setupCallbacks()
 #define VERT_LAND_FILE "assets/water_bump.vert"
 #define FRAG_LAND_FILE "assets/land_bump.frag"
 #define VERT_CUBEMAP "assets/cubemap.vert"
-//#define FRAG_CUBEMAP "assets/cubemap.frag"
-#define FRAG_CUBEMAP "assets/texcoord.frag"
+#define FRAG_CUBEMAP "assets/cubemap.frag"
+//#define FRAG_CUBEMAP "assets/texcoord.frag"
 #define VERT_MOON_FILE "assets/water_bump.vert"
 #define FRAG_MOON_FILE "assets/moon_bump.frag"
 #define LAND_FILE "assets/icosphere2.obj"	
@@ -487,7 +508,7 @@ void createScene()
 	cubemap.shader(*Storage<ShaderProgram>::instance().get("cubemap"));
 	cubemap.beforeDraw([]() {glFrontFace(GL_CW); });
 	cubemap.afterDraw([]() {glFrontFace(GL_CCW); });
-	cubemap.texture(Storage<Texture>::instance().get("cubemap"));
+	//cubemap.texture(Storage<Texture>::instance().get("cubemap"));
 
 	moonAnchor.addChild(&moon);
 	moonAnchor.updateFunc(moonOrbit);
@@ -510,9 +531,10 @@ void init(int argc, char* argv[])
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
+	setupDevIL();
 	createShaderProgram();
 	createMeshes();
-	createTextures();
+	//createTextures();
 	setupCamera();
 	createScene();	
 	setupCallbacks();
