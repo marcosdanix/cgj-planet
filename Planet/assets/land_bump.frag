@@ -102,13 +102,8 @@ vec2 blinnPhong(vec3 normal, vec3 light, float kA, float kD, float kS, float shi
 {
 	float NdotL = dot(normal, light);
 	float diffuse = max(0.0, NdotL);
-	/** /
-	vec3 R = reflect(-light, normal);
-	vec3 V = normalize(-e_Position);
-	specular = pow(max(0.0, dot(R,V)), shiny);
-	/**/
 	vec3 H = normalize(light - normalize(e_Position));
-	float specular = diffuse*pow(max(0.0, dot(normal, H)), shiny);
+	float specular = NdotL > 0.0 ? pow(max(0.0, dot(normal, H)), shiny) : 0.0;
 	return vec2(kA + kD*diffuse, kS*specular);
 }
 
