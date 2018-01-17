@@ -10,7 +10,7 @@
 
 using namespace cgj;
 
-#define CAPTION "Hello Munkey"
+#define CAPTION "Terrestrial Planet by Group 11"
 
 //Shader input attributes
 #define VERTICES 0
