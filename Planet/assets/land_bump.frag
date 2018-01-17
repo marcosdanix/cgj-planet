@@ -11,6 +11,7 @@ out vec4 out_Color;
 uniform mat3 Normal;
 
 //const vec3 Light = normalize(vec3(1, 1, 1));
+const vec4 BeachColor = vec4(1,1,0.6,1);
 const vec4 Color = vec4(0.7,0.4,0.1,1);
 const vec4 White = vec4(1,0.5,0,1);
 const float Gloss = 8.0;
@@ -18,6 +19,9 @@ const float Ambient = 0.1;
 const float Freq = 12.0;
 const float Amp = 0.01;
 const float Delta = 0.01/Freq;
+
+const float pi = 3.14159265359;
+const float maxHeight = 1.13;
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson
@@ -143,7 +147,20 @@ void main()
 	vec3 t = normalize(pos0 - posu);
 	vec3 b = normalize(pos0 - posv);
 	
+  float height = (length(m_Position) - 1.0)/(maxHeight - 1.0);
+  float latitude = 1.0 - acos(abs(normalize(m_Position).y)) / (0.5*pi);
+
 	vec3 normal = normalize(Normal * cross(t, b));
 	vec2 phong = blinnPhong(normal, Light, Ambient, 1.0, 0.1, Gloss);
-	out_Color = phong.x * Color + phong.y * White;
+
+  if (height > 0.65)
+    out_Color = phong.x * vec4(vec3(height), 1) + phong.y * White;
+  else if (height > 0.5 && height < 0.65)
+    out_Color = phong.x * mix(Color, vec4(vec3(height), 1), (height - 0.5)/0.15) + phong.y * White;
+  else if (height > 0.025 && height < 0.075*(1.0-latitude))
+    out_Color = phong.x * mix(BeachColor, Color, (height - 0.025)/0.05) + phong.y * White;
+  else if (height < 0.025)
+    out_Color = phong.x * BeachColor + phong.y * White;
+  else 
+    out_Color = phong.x * Color + phong.y * White;
 }
