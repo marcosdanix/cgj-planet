@@ -454,8 +454,8 @@ TextureCubemap cubemap_texture;
 void createTextures()
 {
 	StarmapGenerator gen;
-	cubemap_texture.create(gen.generate(1024), 1024, 1024, 10);
-	Storage<Texture>::instance().add("cubemap", &cubemap_texture);
+	//cubemap_texture.create(gen.generate(1024), 1024, 1024, 10);
+	//Storage<Texture>::instance().add("cubemap", &cubemap_texture);
 }
 
 
